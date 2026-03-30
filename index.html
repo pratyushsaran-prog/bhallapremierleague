@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>IPL Family League</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body { font-family: Arial; background:#0a0a0f; color:white; padding:20px; }
+.card { border:1px solid #333; padding:15px; margin-bottom:10px; border-radius:10px; }
+button { padding:8px; margin:4px; cursor:pointer; }
+input { padding:8px; }
+</style>
+</head>
+<body>
+
+<h2>IPL Family League 🏏</h2>
+
+<div id="login"></div>
+<div id="app" style="display:none"></div>
+<div id="leaderboard"></div>
+
+<script>
+
+// 🔑 ADD YOUR SUPABASE DETAILS
+const SUPABASE_URL = "https://kpfnoppmfvkxdssaabef.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwZm5vcHBtZnZreGRzc2FhYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODEyODgsImV4cCI6MjA5MDQ1NzI4OH0.Prjaq85U5EDTKdRrn4tqiO0p-7ktlE1d5yjBfXlLVp4";
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let user = null;
+
+// ---------------- SEED USERS ----------------
+async function seedUsers() {
+  const users = [
+    { name: 'Pratyush', code: 'PRAT' },
+    { name: 'Tanmay', code: 'TANM' },
+    { name: 'Shubham', code: 'SHUB' },
+    { name: 'Adit', code: 'ADIT' },
+    { name: 'Aditi', code: 'ADITI' },
+    { name: 'Madhav', code: 'MADH' },
+    { name: 'Amit', code: 'AMIT' },
+    { name: 'Anita', code: 'ANIT' },
+    { name: 'Nutan', code: 'NUTA' },
+    { name: 'Rakesh', code: 'RAKE' }
+  ];
+
+  for (let u of users) {
+    await supabase.from('users').upsert(u);
+  }
+}
+
+// ---------------- SEED MATCHES ----------------
+async function seedMatches() {
+  const matches = [
+    { id:'m4', team1:'PBKS', team2:'GT', team1_name:'Punjab Kings', team2_name:'Gujarat Titans', match_time:'2026-03-31T19:30:00+05:30' },
+    { id:'m5', team1:'LSG', team2:'DC', team1_name:'Lucknow Super Giants', team2_name:'Delhi Capitals', match_time:'2026-04-01T19:30:00+05:30' },
+    { id:'m6', team1:'KKR', team2:'SRH', team1_name:'Kolkata Knight Riders', team2_name:'Sunrisers Hyderabad', match_time:'2026-04-02T19:30:00+05:30' },
+    { id:'m7', team1:'CSK', team2:'PBKS', team1_name:'Chennai Super Kings', team2_name:'Punjab Kings', match_time:'2026-04-03T19:30:00+05:30' },
+    { id:'m8', team1:'DC', team2:'MI', team1_name:'Delhi Capitals', team2_name:'Mumbai Indians', match_time:'2026-04-04T15:30:00+05:30' },
+    { id:'m9', team1:'GT', team2:'RR', team1_name:'Gujarat Titans', team2_name:'Rajasthan Royals', match_time:'2026-04-04T19:30:00+05:30' },
+    { id:'m10', team1:'SRH', team2:'LSG', team1_name:'Sunrisers Hyderabad', team2_name:'Lucknow Super Giants', match_time:'2026-04-05T15:30:00+05:30' },
+    { id:'m11', team1:'RCB', team2:'CSK', team1_name:'Royal Challengers Bengaluru', team2_name:'Chennai Super Kings', match_time:'2026-04-05T19:30:00+05:30' },
+    { id:'m12', team1:'KKR', team2:'PBKS', team1_name:'Kolkata Knight Riders', team2_name:'Punjab Kings', match_time:'2026-04-06T19:30:00+05:30' },
+    { id:'m13', team1:'RR', team2:'MI', team1_name:'Rajasthan Royals', team2_name:'Mumbai Indians', match_time:'2026-04-07T19:30:00+05:30' },
+    { id:'m14', team1:'DC', team2:'GT', team1_name:'Delhi Capitals', team2_name:'Gujarat Titans', match_time:'2026-04-08T19:30:00+05:30' },
+    { id:'m15', team1:'KKR', team2:'LSG', team1_name:'Kolkata Knight Riders', team2_name:'Lucknow Super Giants', match_time:'2026-04-09T19:30:00+05:30' },
+    { id:'m16', team1:'RR', team2:'RCB', team1_name:'Rajasthan Royals', team2_name:'Royal Challengers Bengaluru', match_time:'2026-04-10T19:30:00+05:30' },
+    { id:'m17', team1:'PBKS', team2:'SRH', team1_name:'Punjab Kings', team2_name:'Sunrisers Hyderabad', match_time:'2026-04-11T15:30:00+05:30' },
+    { id:'m18', team1:'CSK', team2:'DC', team1_name:'Chennai Super Kings', team2_name:'Delhi Capitals', match_time:'2026-04-11T19:30:00+05:30' },
+    { id:'m19', team1:'LSG', team2:'GT', team1_name:'Lucknow Super Giants', team2_name:'Gujarat Titans', match_time:'2026-04-12T15:30:00+05:30' },
+    { id:'m20', team1:'MI', team2:'RCB', team1_name:'Mumbai Indians', team2_name:'Royal Challengers Bengaluru', match_time:'2026-04-12T19:30:00+05:30' }
+  ];
+
+  for (let m of matches) {
+    await supabase.from('matches').upsert(m);
+  }
+}
+
+// ---------------- LOGIN ----------------
+function showLogin() {
+  document.getElementById('login').innerHTML = `
+    <input id="code" placeholder="Enter your code" />
+    <button onclick="login()">Join</button>
+  `;
+}
+
+async function login() {
+  const code = document.getElementById('code').value.toUpperCase();
+
+  const { data } = await supabase
+    .from('users')
+    .select('*')
+    .eq('code', code)
+    .single();
+
+  if (!data) return alert('Invalid code');
+
+  user = data;
+  localStorage.setItem('user', JSON.stringify(user));
+  startApp();
+}
+
+function loadUser() {
+  const u = localStorage.getItem('user');
+  if (u) user = JSON.parse(u);
+}
+
+// ---------------- DATA ----------------
+async function loadMatches() {
+  const { data } = await supabase.from('matches').select('*').order('match_time');
+  return data;
+}
+
+async function loadPredictions() {
+  const { data } = await supabase.from('predictions').select('*');
+  return data;
+}
+
+// ---------------- PICK ----------------
+async function submitPick(match_id, team) {
+  await supabase.from('predictions').upsert({ user_id:user.id, match_id, team });
+  render();
+}
+
+function isLocked(time) {
+  return new Date() >= new Date(time);
+}
+
+// ---------------- LEADERBOARD ----------------
+function calculateLeaderboard(users, preds, matches) {
+  const scores = {};
+  users.forEach(u => scores[u.id] = { name:u.name, pts:0 });
+
+  preds.forEach(p => {
+    const match = matches.find(m=>m.id===p.match_id);
+    if (!match || !match.result) return;
+    if (p.team===match.result) scores[p.user_id].pts +=10;
+    else scores[p.user_id].pts -=5;
+  });
+
+  return Object.values(scores).sort((a,b)=>b.pts-a.pts);
+}
+
+async function renderLeaderboard() {
+  const { data:users } = await supabase.from('users').select('*');
+  const preds = await loadPredictions();
+  const matches = await loadMatches();
+
+  const board = calculateLeaderboard(users, preds, matches);
+
+  document.getElementById('leaderboard').innerHTML = `
+    <h3>Leaderboard</h3>
+    ${board.map((u,i)=>`<div>${i+1}. ${u.name} — ${u.pts}</div>`).join('')}
+  `;
+}
+
+// ---------------- RENDER ----------------
+async function render() {
+  const matches = await loadMatches();
+  const preds = await loadPredictions();
+
+  document.getElementById('app').innerHTML = matches.map(m=>{
+    const locked = isLocked(m.match_time);
+    const myPick = preds.find(p=>p.match_id===m.id && p.user_id===user.id);
+
+    return `
+      <div class="card">
+        <b>${m.team1_name} vs ${m.team2_name}</b><br>
+        ${new Date(m.match_time).toLocaleString()}<br><br>
+        ${locked ? '🔒 Locked' : `
+          <button onclick="submitPick('${m.id}','${m.team1}')">${m.team1}</button>
+          <button onclick="submitPick('${m.id}','${m.team2}')">${m.team2}</button>
+        `}
+        <div>Your Pick: ${myPick?myPick.team:'-'}</div>
+      </div>
+    `;
+  }).join('');
+
+  renderLeaderboard();
+}
+
+function startApp() {
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='block';
+  render();
+}
+
+// ---------------- INIT ----------------
+(async ()=>{
+  await seedUsers();
+  await seedMatches();
+  loadUser();
+  if(user) startApp(); else showLogin();
+})();
+
+</script>
+
+</body>
+</html>
