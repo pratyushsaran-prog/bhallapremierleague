@@ -1,199 +1,938 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>IPL Family League</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>IPL 2026 · Family League</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-body { font-family: Arial; background:#0a0a0f; color:white; padding:20px; }
-.card { border:1px solid #333; padding:15px; margin-bottom:10px; border-radius:10px; }
-button { padding:8px; margin:4px; cursor:pointer; }
-input { padding:8px; }
+:root{
+  --bg:#08090f;--s1:#0f101c;--s2:#171828;--s3:#1e2030;
+  --b1:#252638;--b2:#31334a;
+  --acc:#f2b830;--red:#e83d5a;--blue:#4285f4;--grn:#1db954;
+  --txt:#ecedf8;--dim:#5e5f7a;--dim2:#9293aa;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:'Barlow',sans-serif;background:var(--bg);color:var(--txt)}
+body{display:flex;justify-content:center}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.3;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E")}
+#app{width:100%;max-width:430px;height:100vh;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.scr{position:absolute;inset:0;display:flex;flex-direction:column;transition:opacity .22s,transform .22s}
+.scr.off{opacity:0;pointer-events:none;transform:translateY(8px)}
+.scr.on{opacity:1;pointer-events:all;transform:translateY(0)}
+
+/* ─── LOGIN ─── */
+#sL{background:var(--bg);justify-content:center;align-items:center;padding:20px}
+.hero{text-align:center;margin-bottom:28px}
+.cup{font-size:54px;display:block;animation:fl 3s ease-in-out infinite}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.brand{font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:6px;line-height:1;
+  background:linear-gradient(135deg,#f2b830,#e83d5a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.subt{font-size:11px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;font-weight:700;margin-top:6px}
+.lbox{width:100%;background:var(--s1);border:1px solid var(--b1);border-radius:18px;padding:24px 20px}
+.lbox h2{font-size:18px;font-weight:800;margin-bottom:4px}
+.lbox p{font-size:12px;color:var(--dim2);margin-bottom:18px;line-height:1.5}
+.ci{width:100%;padding:15px;border-radius:11px;border:1.5px solid var(--b1);
+  background:var(--s2);color:var(--acc);font-family:'Bebas Neue',sans-serif;
+  font-size:26px;letter-spacing:7px;text-align:center;outline:none;
+  text-transform:uppercase;transition:border-color .2s;margin-bottom:10px}
+.ci:focus{border-color:var(--acc)}
+.ci::placeholder{color:var(--b2);font-size:20px;letter-spacing:3px}
+.err{background:rgba(232,61,90,.1);border:1px solid rgba(232,61,90,.28);
+  border-radius:8px;padding:9px 12px;font-size:12px;color:var(--red);
+  margin-bottom:10px;text-align:center;display:none}
+.gbtn{width:100%;padding:13px;border-radius:10px;border:none;
+  background:linear-gradient(135deg,var(--acc),var(--red));color:#fff;
+  font-family:'Barlow',sans-serif;font-size:15px;font-weight:800;
+  cursor:pointer;transition:opacity .15s;letter-spacing:.3px}
+.gbtn:hover{opacity:.9}
+.gbtn:disabled{opacity:.28;cursor:not-allowed}
+.lfoot{margin-top:18px;font-size:11px;color:var(--dim);text-align:center;line-height:2}
+
+/* ─── MAIN ─── */
+#sM{background:var(--bg)}
+.tb{flex-shrink:0;padding:12px 14px 0;background:linear-gradient(to bottom,var(--bg) 82%,transparent);z-index:50}
+.tr{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;
+  background:linear-gradient(135deg,#f2b830,#e83d5a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.urow{display:flex;align-items:center;gap:6px}
+.upill{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--b1);
+  border-radius:20px;padding:4px 11px 4px 5px;font-size:12px;font-weight:700}
+.uav{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:9px;font-weight:900;color:#fff;flex-shrink:0}
+.upts{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--acc);letter-spacing:1px}
+.ck{display:flex;justify-content:space-between;align-items:center;background:var(--s1);
+  border:1px solid var(--b1);border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px}
+.ckl{display:flex;align-items:center;gap:6px;font-weight:600}
+.d{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.d.g{background:var(--grn)}
+.d.o{background:var(--acc);animation:bk 1.5s infinite}
+.d.r{background:var(--red)}
+@keyframes bk{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.6)}}
+.ckr{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;color:var(--acc)}
+.tabs{display:flex;background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:3px;gap:2px;margin-bottom:2px}
+.tab{flex:1;padding:7px 3px;border:none;background:transparent;color:var(--dim);
+  font-family:'Barlow',sans-serif;font-size:11px;font-weight:800;border-radius:7px;
+  cursor:pointer;transition:all .15s;letter-spacing:.3px;white-space:nowrap}
+.tab.on{background:var(--s2);color:var(--txt);border:1px solid var(--b1)}
+.panels{flex:1;overflow:hidden;position:relative}
+.panel{position:absolute;inset:0;overflow-y:auto;padding:8px 13px 86px;display:none}
+.panel.on{display:block}
+.panel::-webkit-scrollbar{display:none}
+.panel{scrollbar-width:none}
+.sh{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2.5px;color:var(--dim);margin:7px 0 8px}
+
+/* MATCH CARD */
+.mc{background:var(--s1);border:1px solid var(--b1);border-radius:13px;overflow:hidden;margin-bottom:10px;transition:transform .1s}
+.mc:active{transform:scale(.984)}
+.mh{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--b1)}
+.mm{font-size:9px;color:var(--dim);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.chip{font-size:9px;font-weight:800;padding:2px 8px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase}
+.chip.op{background:rgba(29,185,84,.11);color:var(--grn)}
+.chip.lk{background:rgba(94,95,122,.15);color:var(--dim2)}
+.chip.dn{background:rgba(242,184,48,.11);color:var(--acc)}
+.chip.ft{background:rgba(66,133,244,.1);color:var(--blue)}
+.mt{display:flex;align-items:center;padding:11px 12px 9px;gap:7px}
+.mteam{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.tbadge{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;color:#fff;border:2px solid rgba(255,255,255,.06)}
+.tn{font-size:10px;font-weight:700;text-align:center;line-height:1.25}
+.vs{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--dim);letter-spacing:2px;flex-shrink:0}
+
+/* predict zone */
+.pz{padding:0 12px 12px;border-top:1px solid var(--b1)}
+.pzl{font-size:9px;font-weight:800;color:var(--dim);text-transform:uppercase;letter-spacing:.7px;padding-top:9px;margin-bottom:7px}
+.pg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px}
+.pb{padding:9px 5px;border-radius:8px;border:1.5px solid var(--b1);background:var(--s2);
+  color:var(--txt);font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;
+  cursor:pointer;transition:all .12s;text-align:center;line-height:1.3}
+.pb:hover{border-color:rgba(242,184,48,.4)}
+.pb.sel{border-color:var(--acc);background:rgba(242,184,48,.08);color:var(--acc)}
+.cr{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.cl{font-size:10px;color:var(--dim2);flex-shrink:0;font-weight:600}
+.cg{display:flex;gap:5px;flex:1}
+.cb{flex:1;padding:6px 3px;border-radius:7px;border:1.5px solid var(--b1);background:var(--s2);
+  color:var(--dim);font-family:'Barlow',sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:all .12s;text-align:center}
+.cb.sel{border-color:var(--blue);background:rgba(66,133,244,.1);color:var(--blue)}
+.lkb{width:100%;padding:11px;border-radius:8px;border:none;
+  background:linear-gradient(135deg,var(--acc),var(--red));color:#fff;
+  font-family:'Barlow',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:opacity .14s}
+.lkb:hover{opacity:.9}
+.lkb:disabled{opacity:.28;cursor:not-allowed}
+.mv{padding-top:9px;display:flex;justify-content:space-between;align-items:center}
+.mvl{font-size:9px;font-weight:800;color:var(--dim);text-transform:uppercase;letter-spacing:.6px}
+.mvi{display:flex;align-items:center;gap:7px}
+.mvt{font-size:12px;font-weight:800}
+.mvc{font-size:11px;color:var(--blue);font-weight:800}
+.mvk{font-size:9px;background:rgba(29,185,84,.1);color:var(--grn);padding:2px 7px;border-radius:20px;font-weight:800}
+.fm{padding:11px;text-align:center;font-size:11px;color:var(--dim);font-weight:600;font-style:italic}
+
+/* reveal */
+.rz{padding:9px 12px 12px;border-top:1px solid var(--b1)}
+.rzh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.rzl{font-size:9px;font-weight:800;color:var(--dim);text-transform:uppercase;letter-spacing:.7px}
+.rzb{font-size:9px;font-weight:800;letter-spacing:.5px}
+.dr{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.dn2{width:40px;font-size:9px;font-weight:800;flex-shrink:0}
+.dt{flex:1;height:15px;background:var(--s3);border-radius:4px;overflow:hidden}
+.df{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.34,1.56,.64,1)}
+.dp{width:28px;text-align:right;font-size:10px;font-weight:800;flex-shrink:0}
+.dtag{font-size:8px;padding:1px 4px;border-radius:20px;background:rgba(232,61,90,.12);color:var(--red);font-weight:800}
+.chs{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.pch{display:flex;align-items:center;gap:3px;padding:3px 7px 3px 4px;border-radius:20px;
+  background:var(--s2);border:1px solid var(--b1);font-size:10px;font-weight:700}
+.pch.win{border-color:rgba(29,185,84,.38)}
+.pch.los{border-color:rgba(232,61,90,.25);opacity:.6}
+.mav{width:15px;height:15px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:8px;font-weight:900;color:#fff;flex-shrink:0}
+
+/* MY PICKS */
+.sr{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b1);border-radius:12px;overflow:hidden;margin-bottom:11px}
+.sc{background:var(--s1);padding:13px 6px;text-align:center}
+.sv{font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1}
+.sl{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;margin-top:2px}
+.pr{display:flex;align-items:center;gap:10px;background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:11px 12px;margin-bottom:8px}
+.pm{flex:1;min-width:0}
+.pmn{font-size:12px;font-weight:800;margin-bottom:2px}
+.pmd{font-size:10px;color:var(--dim2)}
+.ppr{text-align:right;flex-shrink:0}
+.ptb{font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:2px}
+.ppt{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px}
+.ppt.p{color:var(--grn)}.ppt.n{color:var(--red)}
+.ppd{font-size:10px;color:var(--dim);background:var(--s2);padding:2px 8px;border-radius:20px}
+
+/* STANDINGS */
+.lr{display:flex;align-items:center;gap:10px;background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:11px 12px;margin-bottom:8px}
+.lr.gd{border-color:var(--acc);background:linear-gradient(135deg,rgba(242,184,48,.06),var(--s1))}
+.lr.me{border-color:rgba(66,133,244,.38);background:linear-gradient(135deg,rgba(66,133,244,.05),var(--s1))}
+.lrk{font-family:'Bebas Neue',sans-serif;font-size:20px;width:22px;text-align:center;flex-shrink:0;color:var(--dim)}
+.lr.gd .lrk{color:var(--acc)}
+.lav{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0}
+.li{flex:1;min-width:0}
+.ln{font-size:13px;font-weight:800;display:flex;align-items:center;gap:5px}
+.mtg{font-size:8px;background:rgba(66,133,244,.15);color:var(--blue);padding:2px 6px;border-radius:20px;font-weight:800}
+.ls{font-size:10px;color:var(--dim2);margin-top:2px}
+.lpw{text-align:right;flex-shrink:0}
+.lpt{font-family:'Bebas Neue',sans-serif;font-size:25px;letter-spacing:1px}
+.lr.gd .lpt{color:var(--acc)}
+.lr.me .lpt{color:var(--blue)}
+.lpl{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;display:block;text-align:right}
+.sk{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:13px;margin-top:4px}
+.skh{font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;color:var(--dim);margin-bottom:9px}
+.skr{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
+.skr:last-child{margin-bottom:0}
+
+/* ADMIN */
+.ac{background:var(--s1);border:1px solid var(--b1);border-radius:13px;padding:12px;margin-bottom:10px}
+.ach{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.act{font-size:12px;font-weight:800}
+.wg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.wb{padding:13px 7px;border-radius:9px;border:none;cursor:pointer;
+  font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;transition:all .13s;text-align:center}
+.wb:disabled{opacity:.22;cursor:not-allowed}
+.wbs{font-size:9px;font-family:'Barlow',sans-serif;font-weight:700;display:block;margin-top:3px;opacity:.7}
+.db{display:flex;align-items:center;justify-content:space-between;
+  background:rgba(29,185,84,.07);border:1px solid rgba(29,185,84,.2);
+  border-radius:9px;padding:9px 12px;font-size:12px;font-weight:700;color:var(--grn)}
+.ub{background:none;border:none;color:var(--dim);font-size:11px;font-weight:700;
+  cursor:pointer;text-decoration:underline;padding:0}
+.ub:hover{color:var(--red)}
+
+/* BOTTOM NAV */
+.bn{flex-shrink:0;display:flex;background:var(--s1);border-top:1px solid var(--b1);padding:6px 0 18px}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 3px;
+  border:none;background:transparent;color:var(--dim);cursor:pointer;transition:color .14s}
+.nb.on{color:var(--acc)}
+.ni{font-size:17px}
+.nl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;
+  align-items:center;justify-content:center;padding:20px;display:none}
+.overlay.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:24px 20px;width:100%;max-width:360px}
+.modal h3{font-size:17px;font-weight:800;margin-bottom:8px}
+.modal p{font-size:13px;color:var(--dim2);margin-bottom:18px;line-height:1.6}
+.mbtns{display:flex;gap:10px}
+.mbtns button{flex:1;padding:11px;border-radius:9px;border:none;font-family:'Barlow',sans-serif;font-size:13px;font-weight:800;cursor:pointer}
+.mbcancel{background:var(--s2);color:var(--dim2)}
+.mbconfirm{background:var(--red);color:#fff}
+
+/* toast */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(12px);
+  background:var(--s2);border:1px solid var(--b2);border-radius:10px;padding:9px 16px;
+  font-size:12px;font-weight:700;opacity:0;transition:all .24s;z-index:9998;
+  white-space:nowrap;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.6)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
+<div id="app">
 
-<h2>IPL Family League 🏏</h2>
+<!-- ═══════════ LOGIN ═══════════ -->
+<div id="sL" class="scr on">
+  <div class="hero">
+    <span class="cup">🏆</span>
+    <div class="brand">IPL PREDICTOR</div>
+    <div class="subt">Family League · 2026</div>
+  </div>
+  <div class="lbox">
+    <h2>Enter your code</h2>
+    <p>Type the personal code Pratyush shared with you. Your scores and picks are always saved — logging in again won't reset anything.</p>
+    <input class="ci" id="ci" type="text" placeholder="e.g. PRAT321"
+      autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
+      oninput="onCI()" onkeydown="if(event.key==='Enter')doLogin()">
+    <div class="err" id="err">❌ Wrong code. Double-check with Pratyush.</div>
+    <button class="gbtn" id="gbtn" onclick="doLogin()" disabled>Enter the League →</button>
+  </div>
+  <div class="lfoot">
+    Matches 4–70 · 31 Mar – 24 May 2026<br>
+    <span style="color:var(--dim);font-size:10px">Votes lock at each match start · Picks revealed after lock · Standings always visible</span>
+  </div>
+</div>
 
-<div id="login"></div>
-<div id="app" style="display:none"></div>
-<div id="leaderboard"></div>
+<!-- ═══════════ MAIN ═══════════ -->
+<div id="sM" class="scr off">
+  <div class="tb">
+    <div class="tr">
+      <div class="logo">IPL 2026</div>
+      <div class="urow">
+        <div class="upill"><div class="uav" id="uav">P</div><span id="uname">PRAT</span></div>
+        <div class="upts" id="upts">0 PTS</div>
+      </div>
+    </div>
+    <div class="ck">
+      <div class="ckl"><div class="d g" id="ckd"></div><span id="ckt">Loading…</span></div>
+      <span class="ckr" id="ckr"></span>
+    </div>
+    <div class="tabs" id="tabs">
+      <button class="tab on"  onclick="goTab('matches',this,'n0')">🏏 Matches</button>
+      <button class="tab"     onclick="goTab('mypicks',this,'n1')">🎯 My Picks</button>
+      <button class="tab"     onclick="goTab('standings',this,'n2')">🏆 Standings</button>
+      <button class="tab" id="atab" onclick="goTab('admin',this,'n3')" style="display:none">⚙️ Admin</button>
+    </div>
+  </div>
+  <div class="panels">
+    <div class="panel on" id="p-matches"></div>
+    <div class="panel" id="p-mypicks"></div>
+    <div class="panel" id="p-standings"></div>
+    <div class="panel" id="p-admin"></div>
+  </div>
+  <div class="bn">
+    <button class="nb on" id="n0" onclick="goTab('matches',null,'n0')"><span class="ni">🏏</span><span class="nl">Matches</span></button>
+    <button class="nb" id="n1" onclick="goTab('mypicks',null,'n1')"><span class="ni">🎯</span><span class="nl">My Picks</span></button>
+    <button class="nb" id="n2" onclick="goTab('standings',null,'n2')"><span class="ni">🏆</span><span class="nl">Standings</span></button>
+    <button class="nb" id="n3" onclick="goTab('admin',null,'n3')" style="display:none"><span class="ni">⚙️</span><span class="nl">Admin</span></button>
+    <button class="nb" onclick="signOut()"><span class="ni">🚪</span><span class="nl">Sign Out</span></button>
+  </div>
+</div>
+
+<!-- undo confirm modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3>Undo Result?</h3>
+    <p id="modal-msg">This will remove the result and reverse all points for this match. Are you sure?</p>
+    <div class="mbtns">
+      <button class="mbcancel" onclick="closeModal()">Cancel</button>
+      <button class="mbconfirm" onclick="confirmUndo()">Yes, Undo</button>
+    </div>
+  </div>
+</div>
+
+</div>
+<div id="toast"></div>
 
 <script>
+/* ══════════════════════════════════════
+   USERS
+══════════════════════════════════════ */
+const USERS=[
+  {code:'MADH123',name:'Madhuri', grad:'linear-gradient(135deg,#f77062,#fe5196)'},
+  {code:'AMIT456',name:'Amit',    grad:'linear-gradient(135deg,#4facfe,#00f2fe)'},
+  {code:'ANIT789',name:'Anita',   grad:'linear-gradient(135deg,#43e97b,#38f9d7)'},
+  {code:'PRAT321',name:'Pratyush',grad:'linear-gradient(135deg,#f2b830,#e83d5a)',admin:true},
+  {code:'SHUB654',name:'Shubham', grad:'linear-gradient(135deg,#a18cd1,#fbc2eb)'},
+  {code:'ADIT987',name:'Aditi',   grad:'linear-gradient(135deg,#667eea,#764ba2)'},
+  {code:'TANM135',name:'Tanmay',  grad:'linear-gradient(135deg,#0ba360,#3cba92)'},
+  {code:'RAKE246',name:'Rakesh',  grad:'linear-gradient(135deg,#f093fb,#f5576c)'},
+  {code:'NUTA359',name:'Nutan',   grad:'linear-gradient(135deg,#fccb90,#d57eeb)'},
+]
 
-// 🔑 ADD YOUR SUPABASE DETAILS
-const SUPABASE_URL = "https://kpfnoppmfvkxdssaabef.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwZm5vcHBtZnZreGRzc2FhYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODEyODgsImV4cCI6MjA5MDQ1NzI4OH0.Prjaq85U5EDTKdRrn4tqiO0p-7ktlE1d5yjBfXlLVp4";
+/* ══════════════════════════════════════
+   ALL 70 MATCHES — official BCCI schedule
+   Starting from Match 4 (31 Mar) as today
+   Matches 1-3 shown as historical/locked
+══════════════════════════════════════ */
+const MATCHES=[
+  // ── Past matches (1-3) already played ──
+  {id:1, date:'2026-03-28',time:'19:30',home:'Royal Challengers Bengaluru',away:'Sunrisers Hyderabad',    venue:'Bengaluru',     past:true},
+  {id:2, date:'2026-03-29',time:'19:30',home:'Mumbai Indians',             away:'Kolkata Knight Riders',  venue:'Mumbai',        past:true},
+  {id:3, date:'2026-03-30',time:'19:30',home:'Rajasthan Royals',           away:'Chennai Super Kings',    venue:'Guwahati',      past:true},
+  // ── Active from today ──
+  {id:4, date:'2026-03-31',time:'19:30',home:'Punjab Kings',               away:'Gujarat Titans',         venue:'New Chandigarh'},
+  {id:5, date:'2026-04-01',time:'19:30',home:'Lucknow Super Giants',       away:'Delhi Capitals',         venue:'Lucknow'},
+  {id:6, date:'2026-04-02',time:'19:30',home:'Kolkata Knight Riders',      away:'Sunrisers Hyderabad',    venue:'Kolkata'},
+  {id:7, date:'2026-04-03',time:'19:30',home:'Chennai Super Kings',        away:'Punjab Kings',           venue:'Chennai'},
+  {id:8, date:'2026-04-04',time:'15:30',home:'Delhi Capitals',             away:'Mumbai Indians',         venue:'Delhi'},
+  {id:9, date:'2026-04-04',time:'19:30',home:'Gujarat Titans',             away:'Rajasthan Royals',       venue:'Ahmedabad'},
+  {id:10,date:'2026-04-05',time:'15:30',home:'Sunrisers Hyderabad',        away:'Lucknow Super Giants',   venue:'Hyderabad'},
+  {id:11,date:'2026-04-05',time:'19:30',home:'Royal Challengers Bengaluru',away:'Chennai Super Kings',    venue:'Bengaluru'},
+  {id:12,date:'2026-04-06',time:'19:30',home:'Kolkata Knight Riders',      away:'Punjab Kings',           venue:'Kolkata'},
+  {id:13,date:'2026-04-07',time:'19:30',home:'Rajasthan Royals',           away:'Mumbai Indians',         venue:'Guwahati'},
+  {id:14,date:'2026-04-08',time:'19:30',home:'Delhi Capitals',             away:'Gujarat Titans',         venue:'Delhi'},
+  {id:15,date:'2026-04-09',time:'19:30',home:'Kolkata Knight Riders',      away:'Lucknow Super Giants',   venue:'Kolkata'},
+  {id:16,date:'2026-04-10',time:'19:30',home:'Rajasthan Royals',           away:'Royal Challengers Bengaluru',venue:'Guwahati'},
+  {id:17,date:'2026-04-11',time:'15:30',home:'Punjab Kings',               away:'Sunrisers Hyderabad',    venue:'New Chandigarh'},
+  {id:18,date:'2026-04-11',time:'19:30',home:'Chennai Super Kings',        away:'Delhi Capitals',         venue:'Chennai'},
+  {id:19,date:'2026-04-12',time:'15:30',home:'Lucknow Super Giants',       away:'Gujarat Titans',         venue:'Lucknow'},
+  {id:20,date:'2026-04-12',time:'19:30',home:'Mumbai Indians',             away:'Royal Challengers Bengaluru',venue:'Mumbai'},
+  {id:21,date:'2026-04-13',time:'19:30',home:'Sunrisers Hyderabad',        away:'Rajasthan Royals',       venue:'Hyderabad'},
+  {id:22,date:'2026-04-14',time:'19:30',home:'Chennai Super Kings',        away:'Kolkata Knight Riders',  venue:'Chennai'},
+  {id:23,date:'2026-04-15',time:'19:30',home:'Royal Challengers Bengaluru',away:'Lucknow Super Giants',   venue:'Bengaluru'},
+  {id:24,date:'2026-04-16',time:'19:30',home:'Mumbai Indians',             away:'Punjab Kings',           venue:'Mumbai'},
+  {id:25,date:'2026-04-17',time:'19:30',home:'Gujarat Titans',             away:'Kolkata Knight Riders',  venue:'Ahmedabad'},
+  {id:26,date:'2026-04-18',time:'15:30',home:'Royal Challengers Bengaluru',away:'Delhi Capitals',         venue:'Bengaluru'},
+  {id:27,date:'2026-04-18',time:'19:30',home:'Sunrisers Hyderabad',        away:'Chennai Super Kings',    venue:'Hyderabad'},
+  {id:28,date:'2026-04-19',time:'15:30',home:'Kolkata Knight Riders',      away:'Rajasthan Royals',       venue:'Kolkata'},
+  {id:29,date:'2026-04-19',time:'19:30',home:'Punjab Kings',               away:'Lucknow Super Giants',   venue:'New Chandigarh'},
+  {id:30,date:'2026-04-20',time:'19:30',home:'Gujarat Titans',             away:'Mumbai Indians',         venue:'Ahmedabad'},
+  {id:31,date:'2026-04-21',time:'19:30',home:'Sunrisers Hyderabad',        away:'Delhi Capitals',         venue:'Hyderabad'},
+  {id:32,date:'2026-04-22',time:'19:30',home:'Lucknow Super Giants',       away:'Rajasthan Royals',       venue:'Lucknow'},
+  {id:33,date:'2026-04-23',time:'19:30',home:'Mumbai Indians',             away:'Chennai Super Kings',    venue:'Mumbai'},
+  {id:34,date:'2026-04-24',time:'19:30',home:'Royal Challengers Bengaluru',away:'Gujarat Titans',         venue:'Bengaluru'},
+  {id:35,date:'2026-04-25',time:'15:30',home:'Delhi Capitals',             away:'Punjab Kings',           venue:'Delhi'},
+  {id:36,date:'2026-04-25',time:'19:30',home:'Rajasthan Royals',           away:'Sunrisers Hyderabad',    venue:'Jaipur'},
+  {id:37,date:'2026-04-26',time:'15:30',home:'Gujarat Titans',             away:'Chennai Super Kings',    venue:'Ahmedabad'},
+  {id:38,date:'2026-04-26',time:'19:30',home:'Lucknow Super Giants',       away:'Kolkata Knight Riders',  venue:'Lucknow'},
+  {id:39,date:'2026-04-27',time:'19:30',home:'Delhi Capitals',             away:'Royal Challengers Bengaluru',venue:'Delhi'},
+  {id:40,date:'2026-04-28',time:'19:30',home:'Punjab Kings',               away:'Rajasthan Royals',       venue:'New Chandigarh'},
+  {id:41,date:'2026-04-29',time:'19:30',home:'Mumbai Indians',             away:'Sunrisers Hyderabad',    venue:'Mumbai'},
+  {id:42,date:'2026-04-30',time:'19:30',home:'Gujarat Titans',             away:'Royal Challengers Bengaluru',venue:'Ahmedabad'},
+  {id:43,date:'2026-05-01',time:'19:30',home:'Rajasthan Royals',           away:'Delhi Capitals',         venue:'Jaipur'},
+  {id:44,date:'2026-05-02',time:'19:30',home:'Chennai Super Kings',        away:'Mumbai Indians',         venue:'Chennai'},
+  {id:45,date:'2026-05-03',time:'15:30',home:'Sunrisers Hyderabad',        away:'Kolkata Knight Riders',  venue:'Hyderabad'},
+  {id:46,date:'2026-05-03',time:'19:30',home:'Gujarat Titans',             away:'Punjab Kings',           venue:'Ahmedabad'},
+  {id:47,date:'2026-05-04',time:'19:30',home:'Mumbai Indians',             away:'Lucknow Super Giants',   venue:'Mumbai'},
+  {id:48,date:'2026-05-05',time:'19:30',home:'Delhi Capitals',             away:'Chennai Super Kings',    venue:'Delhi'},
+  {id:49,date:'2026-05-06',time:'19:30',home:'Sunrisers Hyderabad',        away:'Punjab Kings',           venue:'Hyderabad'},
+  {id:50,date:'2026-05-07',time:'19:30',home:'Lucknow Super Giants',       away:'Royal Challengers Bengaluru',venue:'Lucknow'},
+  {id:51,date:'2026-05-08',time:'19:30',home:'Delhi Capitals',             away:'Kolkata Knight Riders',  venue:'Delhi'},
+  {id:52,date:'2026-05-09',time:'19:30',home:'Rajasthan Royals',           away:'Gujarat Titans',         venue:'Jaipur'},
+  {id:53,date:'2026-05-10',time:'15:30',home:'Chennai Super Kings',        away:'Lucknow Super Giants',   venue:'Chennai'},
+  {id:54,date:'2026-05-10',time:'19:30',home:'Royal Challengers Bengaluru',away:'Mumbai Indians',         venue:'Raipur'},
+  {id:55,date:'2026-05-11',time:'19:30',home:'Punjab Kings',               away:'Delhi Capitals',         venue:'Dharamshala'},
+  {id:56,date:'2026-05-12',time:'19:30',home:'Gujarat Titans',             away:'Sunrisers Hyderabad',    venue:'Ahmedabad'},
+  {id:57,date:'2026-05-13',time:'19:30',home:'Royal Challengers Bengaluru',away:'Kolkata Knight Riders',  venue:'Raipur'},
+  {id:58,date:'2026-05-14',time:'19:30',home:'Punjab Kings',               away:'Mumbai Indians',         venue:'Dharamshala'},
+  {id:59,date:'2026-05-15',time:'19:30',home:'Lucknow Super Giants',       away:'Chennai Super Kings',    venue:'Lucknow'},
+  {id:60,date:'2026-05-16',time:'19:30',home:'Kolkata Knight Riders',      away:'Gujarat Titans',         venue:'Kolkata'},
+  {id:61,date:'2026-05-17',time:'15:30',home:'Punjab Kings',               away:'Royal Challengers Bengaluru',venue:'Dharamshala'},
+  {id:62,date:'2026-05-17',time:'19:30',home:'Delhi Capitals',             away:'Rajasthan Royals',       venue:'Delhi'},
+  {id:63,date:'2026-05-18',time:'19:30',home:'Chennai Super Kings',        away:'Sunrisers Hyderabad',    venue:'Chennai'},
+  {id:64,date:'2026-05-19',time:'19:30',home:'Rajasthan Royals',           away:'Lucknow Super Giants',   venue:'Jaipur'},
+  {id:65,date:'2026-05-20',time:'19:30',home:'Kolkata Knight Riders',      away:'Mumbai Indians',         venue:'Kolkata'},
+  {id:66,date:'2026-05-21',time:'19:30',home:'Chennai Super Kings',        away:'Gujarat Titans',         venue:'Chennai'},
+  {id:67,date:'2026-05-22',time:'19:30',home:'Sunrisers Hyderabad',        away:'Royal Challengers Bengaluru',venue:'Hyderabad'},
+  {id:68,date:'2026-05-23',time:'19:30',home:'Lucknow Super Giants',       away:'Punjab Kings',           venue:'Lucknow'},
+  {id:69,date:'2026-05-24',time:'15:30',home:'Mumbai Indians',             away:'Rajasthan Royals',       venue:'Mumbai'},
+  {id:70,date:'2026-05-24',time:'19:30',home:'Kolkata Knight Riders',      away:'Delhi Capitals',         venue:'Kolkata'},
+]
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+/* ══════════════════════════════════════
+   TEAM COLOURS
+══════════════════════════════════════ */
+const TM={
+  'Royal Challengers Bengaluru':{code:'RCB',dark:'#6b0000',light:'#ff8080',acc:'#DC1C24'},
+  'Sunrisers Hyderabad':        {code:'SRH',dark:'#7a3200',light:'#ffaa6a',acc:'#FF8225'},
+  'Mumbai Indians':             {code:'MI', dark:'#003070',light:'#6ab4ff',acc:'#004C93'},
+  'Kolkata Knight Riders':      {code:'KKR',dark:'#200d35',light:'#c9a4ff',acc:'#3A225D'},
+  'Rajasthan Royals':           {code:'RR', dark:'#7a0f50',light:'#ffb3d9',acc:'#E6006A'},
+  'Chennai Super Kings':        {code:'CSK',dark:'#5a4800',light:'#f9d040',acc:'#F9CD05'},
+  'Punjab Kings':               {code:'PBKS',dark:'#7a0000',light:'#ff9090',acc:'#ED1B24'},
+  'Gujarat Titans':             {code:'GT', dark:'#0e1930',light:'#8a9fd4',acc:'#1C2951'},
+  'Lucknow Super Giants':       {code:'LSG',dark:'#003030',light:'#a2ffff',acc:'#009090'},
+  'Delhi Capitals':             {code:'DC', dark:'#00006b',light:'#7eb3ff',acc:'#0057A8'},
+}
+function tm(n){return TM[n]||{code:n.slice(0,3).toUpperCase(),dark:'#222',light:'#aaa',acc:'#555'}}
 
-let user = null;
+/* ══════════════════════════════════════
+   STATE — FULLY PERSISTENT in localStorage
+   Login / logout NEVER clears scores.
+   Only PRAT can undo a result (with modal).
+══════════════════════════════════════ */
+const KEY='ipl26_v6'
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s)return s}catch{}return null}
+function blank(){return{
+  votes:{},      // votes[mid][code]={team,conf,ts}
+  results:{},    // results[mid]=winner
+  points:Object.fromEntries(USERS.map(u=>[u.code,0])),
+  stats:Object.fromEntries(USERS.map(u=>[u.code,{w:0,l:0}]))
+}}
+let S=load()||blank()
+USERS.forEach(u=>{if(S.points[u.code]==null)S.points[u.code]=0;if(!S.stats[u.code])S.stats[u.code]={w:0,l:0}})
+function save(){localStorage.setItem(KEY,JSON.stringify(S))}
 
-// ---------------- SEED USERS ----------------
-async function seedUsers() {
-  const users = [
-    { name: 'Pratyush', code: 'PRAT' },
-    { name: 'Tanmay', code: 'TANM' },
-    { name: 'Shubham', code: 'SHUB' },
-    { name: 'Adit', code: 'ADIT' },
-    { name: 'Aditi', code: 'ADITI' },
-    { name: 'Madhav', code: 'MADH' },
-    { name: 'Amit', code: 'AMIT' },
-    { name: 'Anita', code: 'ANIT' },
-    { name: 'Nutan', code: 'NUTA' },
-    { name: 'Rakesh', code: 'RAKE' }
-  ];
+let CU=null,CLK=null,undoMid=null
 
-  for (let u of users) {
-    await supabase.from('users').upsert(u);
-  }
+/* ══════════════════════════════════════
+   IST TIME
+══════════════════════════════════════ */
+function nowIST(){const n=new Date();return new Date(n.getTime()+(5.5*3600000)+n.getTimezoneOffset()*60000)}
+function lockUTC(m){const[h,mi]=m.time.split(':').map(Number),[y,mo,d]=m.date.split('-').map(Number);return new Date(Date.UTC(y,mo-1,d,h-5,mi-30,0))}
+function isLocked(m){return m.past||Date.now()>=lockUTC(m).getTime()}
+function mstat(m){
+  if(m.past)return S.results[m.id]?'dn':'lk'
+  if(S.results[m.id])return'dn'
+  if(isLocked(m))return'lk'
+  const i=nowIST(),[y,mo,d]=m.date.split('-').map(Number)
+  if(i.getFullYear()===y&&i.getMonth()===mo-1&&i.getDate()===d)return'op'
+  return'ft'
+}
+function fmtT(m){const[h,mi]=m.time.split(':').map(Number);return`${h>12?h-12:h}:${String(mi).padStart(2,'0')} ${h>=12?'PM':'AM'} IST`}
+function fmtD(m){
+  const[y,mo,d]=m.date.split('-').map(Number)
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+  const mns=['Jan','Feb','Mar','Apr','May','Jun']
+  return`${days[new Date(Date.UTC(y,mo-1,d)).getUTCDay()]} ${d} ${mns[mo-1]}`
+}
+function dateHdr(ds){
+  const i=nowIST()
+  const td=`${i.getFullYear()}-${String(i.getMonth()+1).padStart(2,'0')}-${String(i.getDate()).padStart(2,'0')}`
+  const[y,mo,d]=ds.split('-').map(Number)
+  const mns=['Jan','Feb','Mar','Apr','May','Jun']
+  if(ds===td)return`📅 TODAY · ${d} ${mns[mo-1]}`
+  const yest=new Date(Date.now()-86400000)
+  const yd=`${yest.getUTCFullYear()}-${String(yest.getUTCMonth()+1).padStart(2,'0')}-${String(yest.getUTCDate()).padStart(2,'0')}`
+  if(ds===yd)return`YESTERDAY · ${d} ${mns[mo-1]}`
+  return`${d} ${mns[mo-1]}`
 }
 
-// ---------------- SEED MATCHES ----------------
-async function seedMatches() {
-  const matches = [
-    { id:'m4', team1:'PBKS', team2:'GT', team1_name:'Punjab Kings', team2_name:'Gujarat Titans', match_time:'2026-03-31T19:30:00+05:30' },
-    { id:'m5', team1:'LSG', team2:'DC', team1_name:'Lucknow Super Giants', team2_name:'Delhi Capitals', match_time:'2026-04-01T19:30:00+05:30' },
-    { id:'m6', team1:'KKR', team2:'SRH', team1_name:'Kolkata Knight Riders', team2_name:'Sunrisers Hyderabad', match_time:'2026-04-02T19:30:00+05:30' },
-    { id:'m7', team1:'CSK', team2:'PBKS', team1_name:'Chennai Super Kings', team2_name:'Punjab Kings', match_time:'2026-04-03T19:30:00+05:30' },
-    { id:'m8', team1:'DC', team2:'MI', team1_name:'Delhi Capitals', team2_name:'Mumbai Indians', match_time:'2026-04-04T15:30:00+05:30' },
-    { id:'m9', team1:'GT', team2:'RR', team1_name:'Gujarat Titans', team2_name:'Rajasthan Royals', match_time:'2026-04-04T19:30:00+05:30' },
-    { id:'m10', team1:'SRH', team2:'LSG', team1_name:'Sunrisers Hyderabad', team2_name:'Lucknow Super Giants', match_time:'2026-04-05T15:30:00+05:30' },
-    { id:'m11', team1:'RCB', team2:'CSK', team1_name:'Royal Challengers Bengaluru', team2_name:'Chennai Super Kings', match_time:'2026-04-05T19:30:00+05:30' },
-    { id:'m12', team1:'KKR', team2:'PBKS', team1_name:'Kolkata Knight Riders', team2_name:'Punjab Kings', match_time:'2026-04-06T19:30:00+05:30' },
-    { id:'m13', team1:'RR', team2:'MI', team1_name:'Rajasthan Royals', team2_name:'Mumbai Indians', match_time:'2026-04-07T19:30:00+05:30' },
-    { id:'m14', team1:'DC', team2:'GT', team1_name:'Delhi Capitals', team2_name:'Gujarat Titans', match_time:'2026-04-08T19:30:00+05:30' },
-    { id:'m15', team1:'KKR', team2:'LSG', team1_name:'Kolkata Knight Riders', team2_name:'Lucknow Super Giants', match_time:'2026-04-09T19:30:00+05:30' },
-    { id:'m16', team1:'RR', team2:'RCB', team1_name:'Rajasthan Royals', team2_name:'Royal Challengers Bengaluru', match_time:'2026-04-10T19:30:00+05:30' },
-    { id:'m17', team1:'PBKS', team2:'SRH', team1_name:'Punjab Kings', team2_name:'Sunrisers Hyderabad', match_time:'2026-04-11T15:30:00+05:30' },
-    { id:'m18', team1:'CSK', team2:'DC', team1_name:'Chennai Super Kings', team2_name:'Delhi Capitals', match_time:'2026-04-11T19:30:00+05:30' },
-    { id:'m19', team1:'LSG', team2:'GT', team1_name:'Lucknow Super Giants', team2_name:'Gujarat Titans', match_time:'2026-04-12T15:30:00+05:30' },
-    { id:'m20', team1:'MI', team2:'RCB', team1_name:'Mumbai Indians', team2_name:'Royal Challengers Bengaluru', match_time:'2026-04-12T19:30:00+05:30' }
-  ];
-
-  for (let m of matches) {
-    await supabase.from('matches').upsert(m);
-  }
+/* ══════════════════════════════════════
+   LOGIN
+══════════════════════════════════════ */
+function onCI(){
+  const v=document.getElementById('ci').value.trim()
+  document.getElementById('gbtn').disabled=v.length<4
+  document.getElementById('err').style.display='none'
+}
+function doLogin(){
+  const raw=document.getElementById('ci').value.trim()
+  const user=USERS.find(u=>u.code.toLowerCase()===raw.toLowerCase())
+  if(!user){document.getElementById('err').style.display='block';document.getElementById('ci').focus();return}
+  CU=user;initMain()
+  document.getElementById('sL').classList.replace('on','off')
+  document.getElementById('sM').classList.replace('off','on')
+}
+function signOut(){
+  // SCORES ARE NEVER CLEARED ON LOGOUT
+  CU=null;clearInterval(CLK)
+  document.getElementById('ci').value=''
+  document.getElementById('gbtn').disabled=true
+  document.getElementById('err').style.display='none'
+  document.getElementById('sM').classList.replace('on','off')
+  document.getElementById('sL').classList.replace('off','on')
 }
 
-// ---------------- LOGIN ----------------
-function showLogin() {
-  document.getElementById('login').innerHTML = `
-    <input id="code" placeholder="Enter your code" />
-    <button onclick="login()">Join</button>
-  `;
+/* ══════════════════════════════════════
+   MAIN INIT
+══════════════════════════════════════ */
+function initMain(){
+  document.getElementById('uav').textContent=CU.name.charAt(0)
+  document.getElementById('uav').style.background=CU.grad
+  document.getElementById('uname').textContent=CU.code.slice(0,4)
+  document.getElementById('upts').textContent=S.points[CU.code]+' PTS'
+  const at=document.getElementById('atab'),n3=document.getElementById('n3')
+  if(CU.admin){at.style.display='';n3.style.display=''}
+  else{at.style.display='none';n3.style.display='none'}
+  goTab('matches',null,'n0')
+  renderAll()
+  startClock()
 }
 
-async function login() {
-  const code = document.getElementById('code').value.toUpperCase();
-
-  const { data } = await supabase
-    .from('users')
-    .select('*')
-    .eq('code', code)
-    .single();
-
-  if (!data) return alert('Invalid code');
-
-  user = data;
-  localStorage.setItem('user', JSON.stringify(user));
-  startApp();
+/* ══════════════════════════════════════
+   CLOCK
+══════════════════════════════════════ */
+function startClock(){clearInterval(CLK);tickClock();CLK=setInterval(()=>{tickClock();renderAll()},30000)}
+function tickClock(){
+  const i=nowIST()
+  const hh=String(i.getHours()).padStart(2,'0'),mm=String(i.getMinutes()).padStart(2,'0')
+  document.getElementById('ckr').textContent=`${hh}:${mm} IST`
+  const open=MATCHES.filter(m=>!isLocked(m))
+  const dot=document.getElementById('ckd'),txt=document.getElementById('ckt')
+  if(!open.length){dot.className='d r';txt.textContent='All 70 matches complete';return}
+  const next=open[0],mins=Math.floor((lockUTC(next).getTime()-Date.now())/60000)
+  if(mins<=0){dot.className='d o';txt.textContent='This match is locked — vote for upcoming ones'}
+  else if(mins<60){dot.className='d o';txt.textContent=`M${next.id} locks in ${mins}m — vote now!`}
+  else{dot.className='d g';txt.textContent=`M${next.id} open · locks ${fmtT(next)}`}
 }
 
-function loadUser() {
-  const u = localStorage.getItem('user');
-  if (u) user = JSON.parse(u);
+/* ══════════════════════════════════════
+   TAB SWITCHING
+══════════════════════════════════════ */
+function goTab(panel,tabEl,navId){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'))
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'))
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'))
+  if(tabEl)tabEl.classList.add('on')
+  else document.querySelectorAll('.tab').forEach(t=>{if((t.getAttribute('onclick')||'').includes("'"+panel+"'"))t.classList.add('on')})
+  document.getElementById('p-'+panel).classList.add('on')
+  const nb=document.getElementById(navId);if(nb)nb.classList.add('on')
 }
 
-// ---------------- DATA ----------------
-async function loadMatches() {
-  const { data } = await supabase.from('matches').select('*').order('match_time');
-  return data;
+/* ══════════════════════════════════════
+   RENDER ALL
+══════════════════════════════════════ */
+function renderAll(){
+  renderMatches();renderMyPicks();renderStandings()
+  if(CU?.admin)renderAdmin()
+  if(CU)document.getElementById('upts').textContent=S.points[CU.code]+' PTS'
 }
 
-async function loadPredictions() {
-  const { data } = await supabase.from('predictions').select('*');
-  return data;
+/* ══════════════════════════════════════
+   RENDER MATCHES  (scroll to today on load)
+══════════════════════════════════════ */
+const PP={}  // pending picks per match
+function renderMatches(){
+  const el=document.getElementById('p-matches')
+  const groups={}
+  MATCHES.forEach(m=>{if(!groups[m.date])groups[m.date]=[];groups[m.date].push(m)})
+  let h=''
+  Object.entries(groups).forEach(([d,ms])=>{
+    const isToday=d===todayStr()
+    h+=`<div class="sh" ${isToday?'id="todayHdr"':''}>${dateHdr(d)}</div>`
+    ms.forEach(m=>{h+=buildCard(m)})
+  })
+  el.innerHTML=h
+  // auto-scroll to today's matches on first render
+  const hdr=el.querySelector('#todayHdr')
+  if(hdr)setTimeout(()=>hdr.scrollIntoView({behavior:'smooth',block:'start'}),100)
 }
+function todayStr(){const i=nowIST();return`${i.getFullYear()}-${String(i.getMonth()+1).padStart(2,'0')}-${String(i.getDate()).padStart(2,'0')}`}
 
-// ---------------- PICK ----------------
-async function submitPick(match_id, team) {
-  await supabase.from('predictions').upsert({ user_id:user.id, match_id, team });
-  render();
-}
+function buildCard(m){
+  const st=mstat(m)
+  const ht=tm(m.home),at2=tm(m.away)
+  const res=S.results[m.id],myV=(S.votes[m.id]||{})[CU.code]
+  const locked=isLocked(m),allV=S.votes[m.id]||{}
+  const hW=res===m.home,aW=res===m.away
+  const chipL={op:'Open · Vote Now',lk:'🔒 Locked',dn:res?`${tm(res).code} Won`:'Result In',ft:'Upcoming'}
 
-function isLocked(time) {
-  return new Date() >= new Date(time);
-}
-
-// ---------------- LEADERBOARD ----------------
-function calculateLeaderboard(users, preds, matches) {
-  const scores = {};
-  users.forEach(u => scores[u.id] = { name:u.name, pts:0 });
-
-  preds.forEach(p => {
-    const match = matches.find(m=>m.id===p.match_id);
-    if (!match || !match.result) return;
-    if (p.team===match.result) scores[p.user_id].pts +=10;
-    else scores[p.user_id].pts -=5;
-  });
-
-  return Object.values(scores).sort((a,b)=>b.pts-a.pts);
-}
-
-async function renderLeaderboard() {
-  const { data:users } = await supabase.from('users').select('*');
-  const preds = await loadPredictions();
-  const matches = await loadMatches();
-
-  const board = calculateLeaderboard(users, preds, matches);
-
-  document.getElementById('leaderboard').innerHTML = `
-    <h3>Leaderboard</h3>
-    ${board.map((u,i)=>`<div>${i+1}. ${u.name} — ${u.pts}</div>`).join('')}
-  `;
-}
-
-// ---------------- RENDER ----------------
-async function render() {
-  const matches = await loadMatches();
-  const preds = await loadPredictions();
-
-  document.getElementById('app').innerHTML = matches.map(m=>{
-    const locked = isLocked(m.match_time);
-    const myPick = preds.find(p=>p.match_id===m.id && p.user_id===user.id);
-
-    return `
-      <div class="card">
-        <b>${m.team1_name} vs ${m.team2_name}</b><br>
-        ${new Date(m.match_time).toLocaleString()}<br><br>
-        ${locked ? '🔒 Locked' : `
-          <button onclick="submitPick('${m.id}','${m.team1}')">${m.team1}</button>
-          <button onclick="submitPick('${m.id}','${m.team2}')">${m.team2}</button>
-        `}
-        <div>Your Pick: ${myPick?myPick.team:'-'}</div>
+  let h=`<div class="mc">
+    <div class="mh">
+      <span class="mm">M${m.id} · ${m.venue} · ${fmtD(m)} · ${fmtT(m)}</span>
+      <span class="chip ${st}">${chipL[st]||'Upcoming'}</span>
+    </div>
+    <div class="mt">
+      <div class="mteam" style="opacity:${aW?.4:1}">
+        <div class="tbadge" style="background:linear-gradient(135deg,${ht.dark},${ht.acc})">${ht.code}</div>
+        <div class="tn" style="${hW?'color:var(--grn)':''}">${m.home}${hW?' ✓':''}</div>
       </div>
-    `;
-  }).join('');
+      <div class="vs">VS</div>
+      <div class="mteam" style="opacity:${hW?.4:1}">
+        <div class="tbadge" style="background:linear-gradient(135deg,${at2.dark},${at2.acc})">${at2.code}</div>
+        <div class="tn" style="${aW?'color:var(--grn)':''}">${m.away}${aW?' ✓':''}</div>
+      </div>
+    </div>`
 
-  renderLeaderboard();
+  if(st==='ft'){
+    h+=`<div class="pz"><div class="fm">Voting opens ${fmtD(m)} · ${fmtT(m)}</div></div>`
+  } else if(st==='op'){
+    if(myV){
+      const mvt=tm(myV.team)
+      h+=`<div class="pz"><div class="mv">
+        <span class="mvl">Your pick</span>
+        <div class="mvi">
+          <span class="mvt" style="color:${mvt.light}">${myV.team}</span>
+          <span class="mvc">${myV.conf}×</span>
+          <span class="mvk">✓ Locked In</span>
+        </div>
+      </div></div>`
+    } else {
+      h+=`<div class="pz">
+        <div class="pzl">Your Prediction</div>
+        <div class="pg">
+          <button class="pb" onclick="pickTeam(${m.id},'${esc(m.home)}',this)">${ht.code}<br><small style="font-size:9px;font-weight:600;opacity:.75">${m.home}</small></button>
+          <button class="pb" onclick="pickTeam(${m.id},'${esc(m.away)}',this)">${at2.code}<br><small style="font-size:9px;font-weight:600;opacity:.75">${m.away}</small></button>
+        </div>
+        <div class="cr">
+          <span class="cl">Confidence:</span>
+          <div class="cg">
+            <button class="cb sel" onclick="pickConf(${m.id},1,this)">1×</button>
+            <button class="cb" onclick="pickConf(${m.id},2,this)">2×</button>
+            <button class="cb" onclick="pickConf(${m.id},3,this)">3×</button>
+          </div>
+        </div>
+        <button class="lkb" id="lk${m.id}" onclick="submitVote(${m.id})" disabled>Select a team first</button>
+      </div>`
+    }
+  } else {
+    // locked or done — show reveal
+    const total=Object.keys(allV).length
+    const hc=Object.values(allV).filter(v=>v.team===m.home).length
+    const ac=Object.values(allV).filter(v=>v.team===m.away).length
+    const hp=total?Math.round(hc/total*100):0,ap=total?Math.round(ac/total*100):0
+    const dog=t=>total>0&&(Object.values(allV).filter(v=>v.team===t).length/total*100)<30
+    h+=`<div class="rz">
+      <div class="rzh">
+        <span class="rzl">Pick Distribution${total?` · ${total} vote${total!==1?'s':''}`:' · No votes yet'}</span>
+        <span class="rzb" style="color:${st==='dn'?'var(--grn)':'var(--red)'}">${st==='dn'?'✅ Result In':'🔒 LOCKED'}</span>
+      </div>
+      <div class="dr">
+        <span class="dn2" style="color:${ht.light}">${ht.code}</span>
+        <div class="dt"><div class="df" style="width:${hp}%;background:linear-gradient(90deg,${ht.dark},${ht.acc})"></div></div>
+        <span class="dp" style="color:${ht.light}">${hp}%</span>
+        ${res&&dog(m.home)&&res===m.home?'<span class="dtag">🐶</span>':''}
+      </div>
+      <div class="dr">
+        <span class="dn2" style="color:${at2.light}">${at2.code}</span>
+        <div class="dt"><div class="df" style="width:${ap}%;background:linear-gradient(90deg,${at2.dark},${at2.acc})"></div></div>
+        <span class="dp" style="color:${at2.light}">${ap}%</span>
+        ${res&&dog(m.away)&&res===m.away?'<span class="dtag">🐶</span>':''}
+      </div>
+      <div class="chs">${buildChips(m,allV,res)}</div>
+    </div>`
+  }
+  return h+'</div>'
 }
 
-function startApp() {
-  document.getElementById('login').style.display='none';
-  document.getElementById('app').style.display='block';
-  render();
+function buildChips(m,allV,res){
+  if(!Object.keys(allV).length)return'<span style="font-size:10px;color:var(--dim)">No picks placed</span>'
+  return USERS.map(u=>{
+    const v=allV[u.code];if(!v)return''
+    const vt=tm(v.team),win=res&&v.team===res,loss=res&&v.team!==res
+    const dog=win&&isDog(m,v.team,allV)
+    const pts=win?`<span style="color:var(--grn);font-weight:900">+${v.conf*10+(dog?5:0)}${dog?'🐶':''}</span>`
+             :loss?`<span style="color:var(--red);font-weight:900">-${v.conf*5}</span>`:''
+    return`<div class="pch ${win?'win':loss?'los':''}">
+      <div class="mav" style="background:${u.grad}">${u.name.charAt(0)}</div>
+      <span style="color:${vt.light};font-weight:800">${vt.code}</span>
+      <span style="color:var(--blue)">·${v.conf}×</span>${pts}
+    </div>`
+  }).join('')
+}
+function isDog(m,team,allV){const t=Object.keys(allV).length,c=Object.values(allV).filter(v=>v.team===team).length;return t>0&&(c/t*100)<30}
+function esc(s){return s.replace(/'/g,"\\'")}
+
+/* ══════════════════════════════════════
+   VOTE LOGIC
+══════════════════════════════════════ */
+function pickTeam(mid,team,btn){
+  if(!PP[mid])PP[mid]={team:null,conf:1}
+  PP[mid].team=team
+  btn.closest('.pg').querySelectorAll('.pb').forEach(b=>b.classList.remove('sel'))
+  btn.classList.add('sel');refreshLk(mid)
+}
+function pickConf(mid,conf,btn){
+  if(!PP[mid])PP[mid]={team:null,conf:1}
+  PP[mid].conf=conf
+  btn.closest('.cg').querySelectorAll('.cb').forEach(b=>b.classList.remove('sel'))
+  btn.classList.add('sel');refreshLk(mid)
+}
+function refreshLk(mid){
+  const btn=document.getElementById('lk'+mid);if(!btn)return
+  const p=PP[mid]
+  if(p&&p.team){btn.disabled=false;btn.textContent=`Lock In: ${tm(p.team).code} · ${p.conf||1}× Confidence`}
+  else{btn.disabled=true;btn.textContent='Select a team first'}
+}
+function submitVote(mid){
+  const p=PP[mid];if(!p||!p.team)return
+  const m=MATCHES.find(x=>x.id===mid)
+  if(!m||isLocked(m)){showToast('⏰ Voting closed for this match!');return}
+  if((S.votes[mid]||{})[CU.code]){showToast('⛔ Already voted — cannot change!');return}
+  if(!S.votes[mid])S.votes[mid]={}
+  S.votes[mid][CU.code]={team:p.team,conf:p.conf||1,ts:Date.now()}
+  save();showToast(`🔒 ${p.team} · ${p.conf||1}× locked in!`);renderAll()
 }
 
-// ---------------- INIT ----------------
-(async ()=>{
-  await seedUsers();
-  await seedMatches();
-  loadUser();
-  if(user) startApp(); else showLogin();
-})();
+/* ══════════════════════════════════════
+   MY PICKS
+══════════════════════════════════════ */
+function renderMyPicks(){
+  const el=document.getElementById('p-mypicks')
+  const st=S.stats[CU.code],pts=S.points[CU.code]
+  const voted=MATCHES.filter(m=>(S.votes[m.id]||{})[CU.code]).length
+  let h=`
+  <div class="sr">
+    <div class="sc"><div class="sv" style="color:var(--grn)">${st.w}</div><div class="sl">Correct</div></div>
+    <div class="sc"><div class="sv" style="color:var(--red)">${st.l}</div><div class="sl">Wrong</div></div>
+    <div class="sc"><div class="sv" style="color:var(--acc)">${pts}</div><div class="sl">Points</div></div>
+  </div>
+  <div style="background:var(--s1);border:1px solid var(--b1);border-radius:11px;padding:9px 12px;margin-bottom:11px;display:flex;justify-content:space-between;align-items:center">
+    <span style="font-size:12px;color:var(--dim2)">Matches voted</span>
+    <span style="font-size:13px;font-weight:800">${voted} / ${MATCHES.length}</span>
+  </div>
+  <div class="sh">MY PREDICTIONS</div>`
 
+  let any=false
+  MATCHES.forEach(m=>{
+    const v=(S.votes[m.id]||{})[CU.code];if(!v)return;any=true
+    const res=S.results[m.id],vt=tm(v.team)
+    const win=res&&v.team===res,loss=res&&v.team!==res
+    const dog=win&&isDog(m,v.team,S.votes[m.id]||{})
+    const pe=win?v.conf*10+(dog?5:0):loss?-(v.conf*5):null
+    h+=`<div class="pr">
+      <div class="pm">
+        <div class="pmn">${tm(m.home).code} vs ${tm(m.away).code}</div>
+        <div class="pmd">${fmtD(m)} · ${fmtT(m)}${res?` · ${tm(res).code} won`:''}</div>
+      </div>
+      <div class="ppr">
+        <div class="ptb" style="background:${vt.dark}44;color:${vt.light}">${vt.code} · ${v.conf}×</div>
+        ${pe!==null?`<div class="ppt ${pe>=0?'p':'n'}">${pe>=0?'+':''}${pe}${dog?'🐶':''}</div>`:`<div class="ppd">Pending</div>`}
+      </div>
+    </div>`
+  })
+  if(!any)h+=`<div style="text-align:center;padding:40px;color:var(--dim);font-size:13px">No predictions yet.<br>Head to Matches to vote 🏏</div>`
+  el.innerHTML=h
+}
+
+/* ══════════════════════════════════════
+   STANDINGS — always visible to everyone
+══════════════════════════════════════ */
+function renderStandings(){
+  const el=document.getElementById('p-standings')
+  const ranked=USERS.map(u=>({...u,pts:S.points[u.code],w:S.stats[u.code].w,l:S.stats[u.code].l,
+    voted:MATCHES.filter(m=>(S.votes[m.id]||{})[u.code]).length}))
+    .sort((a,b)=>b.pts-a.pts||a.code.localeCompare(b.code))
+
+  let h=`<div class="sh">STANDINGS · IPL 2026</div>`
+  ranked.forEach((u,i)=>{
+    const me=u.code===CU.code,first=i===0
+    h+=`<div class="lr ${first?'gd':''} ${me&&!first?'me':''}">
+      <div class="lrk">${first?'👑':i+1}</div>
+      <div class="lav" style="background:${u.grad}">${u.name.charAt(0)}</div>
+      <div class="li">
+        <div class="ln">${u.name}${me?'<span class="mtg">YOU</span>':''}</div>
+        <div class="ls">✅ ${u.w} · ❌ ${u.l} · 🗳 ${u.voted}/${MATCHES.length}</div>
+      </div>
+      <div class="lpw"><div class="lpt">${u.pts}</div><span class="lpl">pts</span></div>
+    </div>`
+  })
+  h+=`<div class="sk">
+    <div class="skh">SCORING KEY</div>
+    <div class="skr"><span style="color:var(--dim2)">Correct pick</span><span style="color:var(--grn);font-weight:800">+10 pts base</span></div>
+    <div class="skr"><span style="color:var(--dim2)">Wrong pick</span><span style="color:var(--red);font-weight:800">−5 pts base</span></div>
+    <div class="skr"><span style="color:var(--dim2)">Confidence multiplier</span><span style="color:var(--blue);font-weight:800">×1 / ×2 / ×3</span></div>
+    <div class="skr"><span style="color:var(--dim2)">Underdog bonus 🐶</span><span style="color:var(--acc);font-weight:800">+5 if &lt;30% picked winner</span></div>
+    <div class="skr" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--b1)">
+      <span style="color:var(--dim2)">Who voted for who</span><span style="color:var(--dim2);font-weight:700">Revealed after match start</span>
+    </div>
+  </div>`
+  el.innerHTML=h
+}
+
+/* ══════════════════════════════════════
+   ADMIN — Result entry (PRAT321 only)
+   ✅ Points auto-calculate on tap
+   ✅ Undo button reverses all points
+══════════════════════════════════════ */
+function renderAdmin(){
+  const el=document.getElementById('p-admin')
+  const pending=MATCHES.filter(m=>isLocked(m)&&!S.results[m.id])
+  const done=MATCHES.filter(m=>S.results[m.id])
+  const upcoming=MATCHES.filter(m=>!isLocked(m))
+
+  let h=`
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;margin-top:4px">
+    <div class="sh" style="margin:0">RESULT ENTRY</div>
+    <span style="font-size:9px;background:rgba(232,61,90,.12);color:var(--red);padding:2px 8px;border-radius:20px;font-weight:800;text-transform:uppercase">PRAT321 ONLY</span>
+  </div>
+  <div style="background:var(--s1);border:1px solid var(--b1);border-radius:11px;padding:9px 12px;margin-bottom:13px;display:grid;grid-template-columns:repeat(3,1fr);text-align:center">
+    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--red)">${pending.length}</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Need Result</div></div>
+    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--grn)">${done.length}</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Done</div></div>
+    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--blue)">${upcoming.length}</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Upcoming</div></div>
+  </div>`
+
+  if(pending.length){
+    h+=`<div class="sh">⚠️ AWAITING YOUR RESULT</div>`
+    pending.forEach(m=>{h+=adminCard(m)})
+  }
+  if(done.length){
+    h+=`<div class="sh">✅ RESULTS ENTERED</div>`
+    done.slice().reverse().forEach(m=>{h+=adminCard(m)})
+  }
+  if(upcoming.length){
+    h+=`<div class="sh">🔜 UPCOMING (not locked yet)</div>`
+    upcoming.slice(0,5).forEach(m=>{h+=adminCard(m)})
+    if(upcoming.length>5)h+=`<div style="text-align:center;padding:8px;font-size:11px;color:var(--dim)">…and ${upcoming.length-5} more upcoming matches</div>`
+  }
+  el.innerHTML=h
+}
+
+function adminCard(m){
+  const res=S.results[m.id],locked=isLocked(m),ht=tm(m.home),at2=tm(m.away)
+  const allV=S.votes[m.id]||{},total=Object.keys(allV).length
+  if(res){
+    return`<div class="ac">
+      <div class="ach"><div class="act">M${m.id} · ${ht.code} vs ${at2.code} · ${fmtD(m)}</div><span class="chip dn">Done</span></div>
+      <div class="db">
+        <span>✅ ${res} won · ${total} pick${total!==1?'s':''} · Points auto-calculated</span>
+        <button class="ub" onclick="askUndo(${m.id})">Undo?</button>
+      </div>
+    </div>`
+  }
+  return`<div class="ac">
+    <div class="ach">
+      <div class="act">M${m.id} · ${m.home} vs ${m.away}</div>
+      <span class="chip ${locked?'lk':'ft'}">${locked?`Locked · ${total} vote${total!==1?'s':''}`:'Not Locked Yet'}</span>
+    </div>
+    <div style="font-size:10px;color:var(--dim2);margin-bottom:9px">${fmtD(m)} · ${fmtT(m)} · ${m.venue}</div>
+    <div class="wg">
+      <button class="wb" ${!locked?'disabled':''} onclick="enterResult(${m.id},'${esc(m.home)}',this)"
+        style="background:linear-gradient(135deg,${ht.dark}55,${ht.dark});color:${ht.light};border:1.5px solid ${ht.acc}44">
+        ${ht.code}<span class="wbs">${locked?'👆 Tap = Winner':'Not locked yet'}</span>
+      </button>
+      <button class="wb" ${!locked?'disabled':''} onclick="enterResult(${m.id},'${esc(m.away)}',this)"
+        style="background:linear-gradient(135deg,${at2.dark}55,${at2.dark});color:${at2.light};border:1.5px solid ${at2.acc}44">
+        ${at2.code}<span class="wbs">${locked?'👆 Tap = Winner':'Not locked yet'}</span>
+      </button>
+    </div>
+  </div>`
+}
+
+/* ══════════════════════════════════════
+   ENTER RESULT — auto-calculates all points
+══════════════════════════════════════ */
+function enterResult(mid,winner){
+  const m=MATCHES.find(x=>x.id===mid)
+  if(!m){showToast('Match not found');return}
+  if(!isLocked(m)){showToast('⏰ Match not locked yet — wait for 7:30 PM IST');return}
+  if(S.results[mid]){showToast('Result already entered. Use Undo to change.');return}
+
+  S.results[mid]=winner
+  const allV=S.votes[mid]||{}
+  const total=Object.keys(allV).length
+  const wc=Object.values(allV).filter(v=>v.team===winner).length
+  const dog=total>0&&(wc/total*100)<30
+
+  // ✅ AUTO-CALCULATE POINTS FOR EVERY USER WHO VOTED
+  let correct=0,wrong=0
+  Object.entries(allV).forEach(([code,v])=>{
+    if(v.team===winner){
+      const p=v.conf*10+(dog?5:0)
+      S.points[code]=(S.points[code]||0)+p
+      S.stats[code].w=(S.stats[code].w||0)+1
+      correct++
+    } else {
+      const p=-(v.conf*5)
+      S.points[code]=(S.points[code]||0)+p
+      S.stats[code].l=(S.stats[code].l||0)+1
+      wrong++
+    }
+  })
+
+  save()
+  showToast(`✅ ${winner} won!`)
+  setTimeout(()=>showToast(`🎯 Points updated: ${correct} correct, ${wrong} wrong${dog?' · 🐶 Underdog bonus applied!':''}}`),2200)
+  renderAll()
+}
+
+/* ══════════════════════════════════════
+   UNDO RESULT (safety net for PRAT)
+══════════════════════════════════════ */
+function askUndo(mid){
+  undoMid=mid
+  const m=MATCHES.find(x=>x.id===mid)
+  document.getElementById('modal-msg').textContent=`This will remove "${S.results[mid]} won" from M${mid} (${m.home} vs ${m.away}) and reverse all points for this match. Are you sure?`
+  document.getElementById('overlay').classList.add('open')
+}
+function closeModal(){document.getElementById('overlay').classList.remove('open');undoMid=null}
+function confirmUndo(){
+  if(!undoMid)return
+  const mid=undoMid,allV=S.votes[mid]||{}
+  const winner=S.results[mid]
+  if(!winner){closeModal();return}
+  const total=Object.keys(allV).length
+  const wc=Object.values(allV).filter(v=>v.team===winner).length
+  const dog=total>0&&(wc/total*100)<30
+
+  // Reverse all points
+  Object.entries(allV).forEach(([code,v])=>{
+    if(v.team===winner){
+      const p=v.conf*10+(dog?5:0)
+      S.points[code]=(S.points[code]||0)-p
+      S.stats[code].w=Math.max(0,(S.stats[code].w||0)-1)
+    } else {
+      const p=-(v.conf*5)
+      S.points[code]=(S.points[code]||0)-p
+      S.stats[code].l=Math.max(0,(S.stats[code].l||0)-1)
+    }
+  })
+  delete S.results[mid]
+  save();closeModal()
+  showToast(`↩️ Result undone for M${mid} — re-enter the correct winner`)
+  renderAll()
+}
+
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+let TT
+function showToast(msg){
+  const t=document.getElementById('toast')
+  t.textContent=msg;t.classList.add('show')
+  clearTimeout(TT);TT=setTimeout(()=>t.classList.remove('show'),3200)
+}
 </script>
-
 </body>
 </html>
