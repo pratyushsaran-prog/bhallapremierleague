@@ -22,7 +22,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .scr.off{opacity:0;pointer-events:none;transform:translateY(8px)}
 .scr.on{opacity:1;pointer-events:all;transform:translateY(0)}
 
-/* ─── LOGIN ─── */
+/* LOGIN */
 #sL{background:var(--bg);justify-content:center;align-items:center;padding:20px}
 .hero{text-align:center;margin-bottom:28px}
 .cup{font-size:54px;display:block;animation:fl 3s ease-in-out infinite}
@@ -39,18 +39,16 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
   text-transform:uppercase;transition:border-color .2s;margin-bottom:10px}
 .ci:focus{border-color:var(--acc)}
 .ci::placeholder{color:var(--b2);font-size:20px;letter-spacing:3px}
-.err{background:rgba(232,61,90,.1);border:1px solid rgba(232,61,90,.28);
-  border-radius:8px;padding:9px 12px;font-size:12px;color:var(--red);
-  margin-bottom:10px;text-align:center;display:none}
+.err{background:rgba(232,61,90,.1);border:1px solid rgba(232,61,90,.28);border-radius:8px;
+  padding:9px 12px;font-size:12px;color:var(--red);margin-bottom:10px;text-align:center;display:none}
 .gbtn{width:100%;padding:13px;border-radius:10px;border:none;
   background:linear-gradient(135deg,var(--acc),var(--red));color:#fff;
-  font-family:'Barlow',sans-serif;font-size:15px;font-weight:800;
-  cursor:pointer;transition:opacity .15s;letter-spacing:.3px}
+  font-family:'Barlow',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:opacity .15s}
 .gbtn:hover{opacity:.9}
 .gbtn:disabled{opacity:.28;cursor:not-allowed}
 .lfoot{margin-top:18px;font-size:11px;color:var(--dim);text-align:center;line-height:2}
 
-/* ─── MAIN ─── */
+/* MAIN */
 #sM{background:var(--bg)}
 .tb{flex-shrink:0;padding:12px 14px 0;background:linear-gradient(to bottom,var(--bg) 82%,transparent);z-index:50}
 .tr{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
@@ -59,22 +57,19 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .urow{display:flex;align-items:center;gap:6px}
 .upill{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--b1);
   border-radius:20px;padding:4px 11px 4px 5px;font-size:12px;font-weight:700}
-.uav{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-size:9px;font-weight:900;color:#fff;flex-shrink:0}
+.uav{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;flex-shrink:0}
 .upts{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--acc);letter-spacing:1px}
 .ck{display:flex;justify-content:space-between;align-items:center;background:var(--s1);
   border:1px solid var(--b1);border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px}
 .ckl{display:flex;align-items:center;gap:6px;font-weight:600}
 .d{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.d.g{background:var(--grn)}
-.d.o{background:var(--acc);animation:bk 1.5s infinite}
-.d.r{background:var(--red)}
+.d.g{background:var(--grn)}.d.o{background:var(--acc);animation:bk 1.5s infinite}.d.r{background:var(--red)}
 @keyframes bk{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(1.6)}}
 .ckr{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;color:var(--acc)}
 .tabs{display:flex;background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:3px;gap:2px;margin-bottom:2px}
-.tab{flex:1;padding:7px 3px;border:none;background:transparent;color:var(--dim);
-  font-family:'Barlow',sans-serif;font-size:11px;font-weight:800;border-radius:7px;
-  cursor:pointer;transition:all .15s;letter-spacing:.3px;white-space:nowrap}
+.tab{flex:1;padding:7px 2px;border:none;background:transparent;color:var(--dim);
+  font-family:'Barlow',sans-serif;font-size:10px;font-weight:800;border-radius:7px;
+  cursor:pointer;transition:all .15s;letter-spacing:.2px;white-space:nowrap}
 .tab.on{background:var(--s2);color:var(--txt);border:1px solid var(--b1)}
 .panels{flex:1;overflow:hidden;position:relative}
 .panel{position:absolute;inset:0;overflow-y:auto;padding:8px 13px 86px;display:none}
@@ -126,7 +121,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .mvt{font-size:12px;font-weight:800}
 .mvc{font-size:11px;color:var(--blue);font-weight:800}
 .mvk{font-size:9px;background:rgba(29,185,84,.1);color:var(--grn);padding:2px 7px;border-radius:20px;font-weight:800}
-.fm{padding:11px;text-align:center;font-size:11px;color:var(--dim);font-weight:600;font-style:italic}
 
 /* reveal */
 .rz{padding:9px 12px 12px;border-top:1px solid var(--b1)}
@@ -144,8 +138,28 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
   background:var(--s2);border:1px solid var(--b1);font-size:10px;font-weight:700}
 .pch.win{border-color:rgba(29,185,84,.38)}
 .pch.los{border-color:rgba(232,61,90,.25);opacity:.6}
-.mav{width:15px;height:15px;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-size:8px;font-weight:900;color:#fff;flex-shrink:0}
+.mav{width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#fff;flex-shrink:0}
+
+/* PICKS TAB */
+.pk-card{background:var(--s1);border:1px solid var(--b1);border-radius:13px;overflow:hidden;margin-bottom:12px}
+.pk-head{display:flex;justify-content:space-between;align-items:center;padding:10px 13px;border-bottom:1px solid var(--b1)}
+.pk-title{font-size:13px;font-weight:800}
+.pk-sub{font-size:10px;color:var(--dim2)}
+.pk-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0;border-top:1px solid var(--b1)}
+.pk-user-col{border-right:1px solid var(--b1);padding:8px 4px;text-align:center}
+.pk-user-col:last-child{border-right:none}
+.pk-name{font-size:8px;font-weight:800;color:var(--dim2);text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px;display:block}
+.pk-pick{padding:4px 3px;border-radius:7px;font-size:9px;font-weight:800;text-align:center;line-height:1.2}
+.pk-pick.win{background:rgba(29,185,84,.12);color:var(--grn)}
+.pk-pick.los{background:rgba(232,61,90,.08);color:var(--red);opacity:.65}
+.pk-pick.pending{background:var(--s2);color:var(--dim2)}
+.pk-pick.no-vote{color:var(--b2);font-style:italic;font-size:8px}
+.pk-locked-msg{padding:16px;text-align:center;font-size:12px;color:var(--dim);font-style:italic}
+.pk-pts{font-size:9px;font-weight:900;margin-top:3px;display:block}
+.pk-pts.pos{color:var(--grn)}
+.pk-pts.neg{color:var(--red)}
+.no-reveal-msg{background:var(--s2);border-radius:9px;padding:8px 10px;margin:8px 13px 12px;
+  font-size:10px;color:var(--dim2);text-align:center;font-style:italic}
 
 /* MY PICKS */
 .sr{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b1);border-radius:12px;overflow:hidden;margin-bottom:11px}
@@ -188,28 +202,22 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .ach{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .act{font-size:12px;font-weight:800}
 .wg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.wb{padding:13px 7px;border-radius:9px;border:none;cursor:pointer;
-  font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;transition:all .13s;text-align:center}
+.wb{padding:13px 7px;border-radius:9px;border:none;cursor:pointer;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;transition:all .13s;text-align:center}
 .wb:disabled{opacity:.22;cursor:not-allowed}
 .wbs{font-size:9px;font-family:'Barlow',sans-serif;font-weight:700;display:block;margin-top:3px;opacity:.7}
-.db{display:flex;align-items:center;justify-content:space-between;
-  background:rgba(29,185,84,.07);border:1px solid rgba(29,185,84,.2);
-  border-radius:9px;padding:9px 12px;font-size:12px;font-weight:700;color:var(--grn)}
-.ub{background:none;border:none;color:var(--dim);font-size:11px;font-weight:700;
-  cursor:pointer;text-decoration:underline;padding:0}
+.db{display:flex;align-items:center;justify-content:space-between;background:rgba(29,185,84,.07);border:1px solid rgba(29,185,84,.2);border-radius:9px;padding:9px 12px;font-size:12px;font-weight:700;color:var(--grn)}
+.ub{background:none;border:none;color:var(--dim);font-size:11px;font-weight:700;cursor:pointer;text-decoration:underline;padding:0}
 .ub:hover{color:var(--red)}
 
 /* BOTTOM NAV */
 .bn{flex-shrink:0;display:flex;background:var(--s1);border-top:1px solid var(--b1);padding:6px 0 18px}
-.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 3px;
-  border:none;background:transparent;color:var(--dim);cursor:pointer;transition:color .14s}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border:none;background:transparent;color:var(--dim);cursor:pointer;transition:color .14s}
 .nb.on{color:var(--acc)}
 .ni{font-size:17px}
-.nl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+.nl{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
 
 /* MODAL */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;
-  align-items:center;justify-content:center;padding:20px;display:none}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center;padding:20px;display:none}
 .overlay.open{display:flex}
 .modal{background:var(--s1);border:1px solid var(--b1);border-radius:16px;padding:24px 20px;width:100%;max-width:360px}
 .modal h3{font-size:17px;font-weight:800;margin-bottom:8px}
@@ -230,7 +238,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 <body>
 <div id="app">
 
-<!-- ═══════════ LOGIN ═══════════ -->
+<!-- LOGIN -->
 <div id="sL" class="scr on">
   <div class="hero">
     <span class="cup">🏆</span>
@@ -239,20 +247,20 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
   </div>
   <div class="lbox">
     <h2>Enter your code</h2>
-    <p>Type the personal code Pratyush shared with you. Your scores and picks are always saved — logging in again won't reset anything.</p>
+    <p>Type the personal code shared with you. Your scores are always saved — re-logging in never resets anything.</p>
     <input class="ci" id="ci" type="text" placeholder="e.g. PRAT321"
       autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
       oninput="onCI()" onkeydown="if(event.key==='Enter')doLogin()">
-    <div class="err" id="err">❌ Wrong code. Double-check with Pratyush.</div>
+    <div class="err" id="err">❌ Wrong code. Check with Pratyush.</div>
     <button class="gbtn" id="gbtn" onclick="doLogin()" disabled>Enter the League →</button>
   </div>
   <div class="lfoot">
-    Matches 4–70 · 31 Mar – 24 May 2026<br>
-    <span style="color:var(--dim);font-size:10px">Votes lock at each match start · Picks revealed after lock · Standings always visible</span>
+    All 70 matches open for voting · 31 Mar – 24 May 2026<br>
+    <span style="color:var(--dim);font-size:10px">Votes lock at match start time · Picks revealed to all after 7:30 PM</span>
   </div>
 </div>
 
-<!-- ═══════════ MAIN ═══════════ -->
+<!-- MAIN -->
 <div id="sM" class="scr off">
   <div class="tb">
     <div class="tr">
@@ -268,68 +276,60 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
     </div>
     <div class="tabs" id="tabs">
       <button class="tab on"  onclick="goTab('matches',this,'n0')">🏏 Matches</button>
-      <button class="tab"     onclick="goTab('mypicks',this,'n1')">🎯 My Picks</button>
-      <button class="tab"     onclick="goTab('standings',this,'n2')">🏆 Standings</button>
-      <button class="tab" id="atab" onclick="goTab('admin',this,'n3')" style="display:none">⚙️ Admin</button>
+      <button class="tab"     onclick="goTab('picks',this,'n1')">👀 All Picks</button>
+      <button class="tab"     onclick="goTab('mypicks',this,'n2')">🎯 My Picks</button>
+      <button class="tab"     onclick="goTab('standings',this,'n3')">🏆 Standings</button>
+      <button class="tab" id="atab" onclick="goTab('admin',this,'n4')" style="display:none">⚙️ Admin</button>
     </div>
   </div>
   <div class="panels">
     <div class="panel on" id="p-matches"></div>
+    <div class="panel" id="p-picks"></div>
     <div class="panel" id="p-mypicks"></div>
     <div class="panel" id="p-standings"></div>
     <div class="panel" id="p-admin"></div>
   </div>
   <div class="bn">
     <button class="nb on" id="n0" onclick="goTab('matches',null,'n0')"><span class="ni">🏏</span><span class="nl">Matches</span></button>
-    <button class="nb" id="n1" onclick="goTab('mypicks',null,'n1')"><span class="ni">🎯</span><span class="nl">My Picks</span></button>
-    <button class="nb" id="n2" onclick="goTab('standings',null,'n2')"><span class="ni">🏆</span><span class="nl">Standings</span></button>
-    <button class="nb" id="n3" onclick="goTab('admin',null,'n3')" style="display:none"><span class="ni">⚙️</span><span class="nl">Admin</span></button>
-    <button class="nb" onclick="signOut()"><span class="ni">🚪</span><span class="nl">Sign Out</span></button>
+    <button class="nb" id="n1" onclick="goTab('picks',null,'n1')"><span class="ni">👀</span><span class="nl">All Picks</span></button>
+    <button class="nb" id="n2" onclick="goTab('mypicks',null,'n2')"><span class="ni">🎯</span><span class="nl">My Picks</span></button>
+    <button class="nb" id="n3" onclick="goTab('standings',null,'n3')"><span class="ni">🏆</span><span class="nl">Standings</span></button>
+    <button class="nb" id="n4" onclick="goTab('admin',null,'n4')" style="display:none"><span class="ni">⚙️</span><span class="nl">Admin</span></button>
+    <button class="nb" onclick="signOut()"><span class="ni">🚪</span><span class="nl">Out</span></button>
   </div>
 </div>
 
-<!-- undo confirm modal -->
+<!-- Undo modal -->
 <div class="overlay" id="overlay">
   <div class="modal">
     <h3>Undo Result?</h3>
-    <p id="modal-msg">This will remove the result and reverse all points for this match. Are you sure?</p>
+    <p id="modal-msg">This will reverse all points for this match.</p>
     <div class="mbtns">
       <button class="mbcancel" onclick="closeModal()">Cancel</button>
       <button class="mbconfirm" onclick="confirmUndo()">Yes, Undo</button>
     </div>
   </div>
 </div>
-
 </div>
 <div id="toast"></div>
 
 <script>
-/* ══════════════════════════════════════
-   USERS
-══════════════════════════════════════ */
+/* ── USERS  (7 members, updated names) ── */
 const USERS=[
-  {code:'MADH123',name:'Madhuri', grad:'linear-gradient(135deg,#f77062,#fe5196)'},
-  {code:'AMIT456',name:'Amit',    grad:'linear-gradient(135deg,#4facfe,#00f2fe)'},
-  {code:'ANIT789',name:'Anita',   grad:'linear-gradient(135deg,#43e97b,#38f9d7)'},
-  {code:'PRAT321',name:'Pratyush',grad:'linear-gradient(135deg,#f2b830,#e83d5a)',admin:true},
-  {code:'SHUB654',name:'Shubham', grad:'linear-gradient(135deg,#a18cd1,#fbc2eb)'},
-  {code:'ADIT987',name:'Aditi',   grad:'linear-gradient(135deg,#667eea,#764ba2)'},
-  {code:'TANM135',name:'Tanmay',  grad:'linear-gradient(135deg,#0ba360,#3cba92)'},
-  {code:'RAKE246',name:'Rakesh',  grad:'linear-gradient(135deg,#f093fb,#f5576c)'},
-  {code:'NUTA359',name:'Nutan',   grad:'linear-gradient(135deg,#fccb90,#d57eeb)'},
+  {code:'MADH123',name:'Madhukar',  grad:'linear-gradient(135deg,#f77062,#fe5196)'},
+  {code:'AMIT456',name:'Amit',      grad:'linear-gradient(135deg,#4facfe,#00f2fe)'},
+  {code:'PRAT321',name:'Pratyush',  grad:'linear-gradient(135deg,#f2b830,#e83d5a)',admin:true},
+  {code:'SHUB654',name:'Shubham',   grad:'linear-gradient(135deg,#a18cd1,#fbc2eb)'},
+  {code:'ADIT987',name:'Aditya',    grad:'linear-gradient(135deg,#667eea,#764ba2)'},
+  {code:'TANM135',name:'Tanmay',    grad:'linear-gradient(135deg,#0ba360,#3cba92)'},
+  {code:'RAKE246',name:'Rakesh',    grad:'linear-gradient(135deg,#f093fb,#f5576c)'},
 ]
 
-/* ══════════════════════════════════════
-   ALL 70 MATCHES — official BCCI schedule
-   Starting from Match 4 (31 Mar) as today
-   Matches 1-3 shown as historical/locked
-══════════════════════════════════════ */
+/* ── ALL 70 MATCHES ── */
 const MATCHES=[
-  // ── Past matches (1-3) already played ──
-  {id:1, date:'2026-03-28',time:'19:30',home:'Royal Challengers Bengaluru',away:'Sunrisers Hyderabad',    venue:'Bengaluru',     past:true},
-  {id:2, date:'2026-03-29',time:'19:30',home:'Mumbai Indians',             away:'Kolkata Knight Riders',  venue:'Mumbai',        past:true},
-  {id:3, date:'2026-03-30',time:'19:30',home:'Rajasthan Royals',           away:'Chennai Super Kings',    venue:'Guwahati',      past:true},
-  // ── Active from today ──
+  {id:1, date:'2026-03-28',time:'19:30',home:'Royal Challengers Bengaluru',away:'Sunrisers Hyderabad',    venue:'Bengaluru',past:true},
+  {id:2, date:'2026-03-29',time:'19:30',home:'Mumbai Indians',             away:'Kolkata Knight Riders',  venue:'Mumbai',   past:true},
+  {id:3, date:'2026-03-30',time:'19:30',home:'Rajasthan Royals',           away:'Chennai Super Kings',    venue:'Guwahati', past:true},
   {id:4, date:'2026-03-31',time:'19:30',home:'Punjab Kings',               away:'Gujarat Titans',         venue:'New Chandigarh'},
   {id:5, date:'2026-04-01',time:'19:30',home:'Lucknow Super Giants',       away:'Delhi Capitals',         venue:'Lucknow'},
   {id:6, date:'2026-04-02',time:'19:30',home:'Kolkata Knight Riders',      away:'Sunrisers Hyderabad',    venue:'Kolkata'},
@@ -399,9 +399,7 @@ const MATCHES=[
   {id:70,date:'2026-05-24',time:'19:30',home:'Kolkata Knight Riders',      away:'Delhi Capitals',         venue:'Kolkata'},
 ]
 
-/* ══════════════════════════════════════
-   TEAM COLOURS
-══════════════════════════════════════ */
+/* ── TEAM COLOURS ── */
 const TM={
   'Royal Challengers Bengaluru':{code:'RCB',dark:'#6b0000',light:'#ff8080',acc:'#DC1C24'},
   'Sunrisers Hyderabad':        {code:'SRH',dark:'#7a3200',light:'#ffaa6a',acc:'#FF8225'},
@@ -415,29 +413,19 @@ const TM={
   'Delhi Capitals':             {code:'DC', dark:'#00006b',light:'#7eb3ff',acc:'#0057A8'},
 }
 function tm(n){return TM[n]||{code:n.slice(0,3).toUpperCase(),dark:'#222',light:'#aaa',acc:'#555'}}
+function esc(s){return s.replace(/'/g,"\\'")}
 
-/* ══════════════════════════════════════
-   STATE — FULLY PERSISTENT in localStorage
-   Login / logout NEVER clears scores.
-   Only PRAT can undo a result (with modal).
-══════════════════════════════════════ */
-const KEY='ipl26_v6'
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s)return s}catch{}return null}
-function blank(){return{
-  votes:{},      // votes[mid][code]={team,conf,ts}
-  results:{},    // results[mid]=winner
-  points:Object.fromEntries(USERS.map(u=>[u.code,0])),
-  stats:Object.fromEntries(USERS.map(u=>[u.code,{w:0,l:0}]))
-}}
-let S=load()||blank()
+/* ── STATE (localStorage — never wiped on logout) ── */
+const KEY='ipl26_v8'
+function loadS(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s)return s}catch{}return null}
+function blankS(){return{votes:{},results:{},points:Object.fromEntries(USERS.map(u=>[u.code,0])),stats:Object.fromEntries(USERS.map(u=>[u.code,{w:0,l:0}]))}}
+let S=loadS()||blankS()
 USERS.forEach(u=>{if(S.points[u.code]==null)S.points[u.code]=0;if(!S.stats[u.code])S.stats[u.code]={w:0,l:0}})
 function save(){localStorage.setItem(KEY,JSON.stringify(S))}
 
 let CU=null,CLK=null,undoMid=null
 
-/* ══════════════════════════════════════
-   IST TIME
-══════════════════════════════════════ */
+/* ── IST TIME ── */
 function nowIST(){const n=new Date();return new Date(n.getTime()+(5.5*3600000)+n.getTimezoneOffset()*60000)}
 function lockUTC(m){const[h,mi]=m.time.split(':').map(Number),[y,mo,d]=m.date.split('-').map(Number);return new Date(Date.UTC(y,mo-1,d,h-5,mi-30,0))}
 function isLocked(m){return m.past||Date.now()>=lockUTC(m).getTime()}
@@ -445,22 +433,18 @@ function mstat(m){
   if(m.past)return S.results[m.id]?'dn':'lk'
   if(S.results[m.id])return'dn'
   if(isLocked(m))return'lk'
-  const i=nowIST(),[y,mo,d]=m.date.split('-').map(Number)
-  if(i.getFullYear()===y&&i.getMonth()===mo-1&&i.getDate()===d)return'op'
-  return'ft'
+  return'op'  // ALL unlocked matches are open for voting
 }
+function todayStr(){const i=nowIST();return`${i.getFullYear()}-${String(i.getMonth()+1).padStart(2,'0')}-${String(i.getDate()).padStart(2,'0')}`}
 function fmtT(m){const[h,mi]=m.time.split(':').map(Number);return`${h>12?h-12:h}:${String(mi).padStart(2,'0')} ${h>=12?'PM':'AM'} IST`}
 function fmtD(m){
   const[y,mo,d]=m.date.split('-').map(Number)
-  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
-  const mns=['Jan','Feb','Mar','Apr','May','Jun']
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],mns=['Jan','Feb','Mar','Apr','May','Jun']
   return`${days[new Date(Date.UTC(y,mo-1,d)).getUTCDay()]} ${d} ${mns[mo-1]}`
 }
 function dateHdr(ds){
-  const i=nowIST()
-  const td=`${i.getFullYear()}-${String(i.getMonth()+1).padStart(2,'0')}-${String(i.getDate()).padStart(2,'0')}`
-  const[y,mo,d]=ds.split('-').map(Number)
-  const mns=['Jan','Feb','Mar','Apr','May','Jun']
+  const i=nowIST(),td=todayStr()
+  const[y,mo,d]=ds.split('-').map(Number),mns=['Jan','Feb','Mar','Apr','May','Jun']
   if(ds===td)return`📅 TODAY · ${d} ${mns[mo-1]}`
   const yest=new Date(Date.now()-86400000)
   const yd=`${yest.getUTCFullYear()}-${String(yest.getUTCMonth()+1).padStart(2,'0')}-${String(yest.getUTCDate()).padStart(2,'0')}`
@@ -468,14 +452,8 @@ function dateHdr(ds){
   return`${d} ${mns[mo-1]}`
 }
 
-/* ══════════════════════════════════════
-   LOGIN
-══════════════════════════════════════ */
-function onCI(){
-  const v=document.getElementById('ci').value.trim()
-  document.getElementById('gbtn').disabled=v.length<4
-  document.getElementById('err').style.display='none'
-}
+/* ── LOGIN ── */
+function onCI(){const v=document.getElementById('ci').value.trim();document.getElementById('gbtn').disabled=v.length<4;document.getElementById('err').style.display='none'}
 function doLogin(){
   const raw=document.getElementById('ci').value.trim()
   const user=USERS.find(u=>u.code.toLowerCase()===raw.toLowerCase())
@@ -485,7 +463,6 @@ function doLogin(){
   document.getElementById('sM').classList.replace('off','on')
 }
 function signOut(){
-  // SCORES ARE NEVER CLEARED ON LOGOUT
   CU=null;clearInterval(CLK)
   document.getElementById('ci').value=''
   document.getElementById('gbtn').disabled=true
@@ -494,42 +471,35 @@ function signOut(){
   document.getElementById('sL').classList.replace('off','on')
 }
 
-/* ══════════════════════════════════════
-   MAIN INIT
-══════════════════════════════════════ */
+/* ── MAIN INIT ── */
 function initMain(){
   document.getElementById('uav').textContent=CU.name.charAt(0)
   document.getElementById('uav').style.background=CU.grad
-  document.getElementById('uname').textContent=CU.code.slice(0,4)
+  document.getElementById('uname').textContent=CU.name
   document.getElementById('upts').textContent=S.points[CU.code]+' PTS'
-  const at=document.getElementById('atab'),n3=document.getElementById('n3')
-  if(CU.admin){at.style.display='';n3.style.display=''}
-  else{at.style.display='none';n3.style.display='none'}
+  const at=document.getElementById('atab'),n4=document.getElementById('n4')
+  if(CU.admin){at.style.display='';n4.style.display=''}
+  else{at.style.display='none';n4.style.display='none'}
   goTab('matches',null,'n0')
   renderAll()
   startClock()
 }
 
-/* ══════════════════════════════════════
-   CLOCK
-══════════════════════════════════════ */
+/* ── CLOCK ── */
 function startClock(){clearInterval(CLK);tickClock();CLK=setInterval(()=>{tickClock();renderAll()},30000)}
 function tickClock(){
   const i=nowIST()
-  const hh=String(i.getHours()).padStart(2,'0'),mm=String(i.getMinutes()).padStart(2,'0')
-  document.getElementById('ckr').textContent=`${hh}:${mm} IST`
+  document.getElementById('ckr').textContent=`${String(i.getHours()).padStart(2,'0')}:${String(i.getMinutes()).padStart(2,'0')} IST`
   const open=MATCHES.filter(m=>!isLocked(m))
   const dot=document.getElementById('ckd'),txt=document.getElementById('ckt')
   if(!open.length){dot.className='d r';txt.textContent='All 70 matches complete';return}
   const next=open[0],mins=Math.floor((lockUTC(next).getTime()-Date.now())/60000)
-  if(mins<=0){dot.className='d o';txt.textContent='This match is locked — vote for upcoming ones'}
+  if(mins<=0){dot.className='d o';txt.textContent='Voting closed for this match'}
   else if(mins<60){dot.className='d o';txt.textContent=`M${next.id} locks in ${mins}m — vote now!`}
-  else{dot.className='d g';txt.textContent=`M${next.id} open · locks ${fmtT(next)}`}
+  else{dot.className='d g';txt.textContent=`All matches open · M${next.id} locks ${fmtT(next)}`}
 }
 
-/* ══════════════════════════════════════
-   TAB SWITCHING
-══════════════════════════════════════ */
+/* ── TABS ── */
 function goTab(panel,tabEl,navId){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'))
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'))
@@ -540,19 +510,15 @@ function goTab(panel,tabEl,navId){
   const nb=document.getElementById(navId);if(nb)nb.classList.add('on')
 }
 
-/* ══════════════════════════════════════
-   RENDER ALL
-══════════════════════════════════════ */
+/* ── RENDER ALL ── */
 function renderAll(){
-  renderMatches();renderMyPicks();renderStandings()
+  renderMatches();renderPicks();renderMyPicks();renderStandings()
   if(CU?.admin)renderAdmin()
   if(CU)document.getElementById('upts').textContent=S.points[CU.code]+' PTS'
 }
 
-/* ══════════════════════════════════════
-   RENDER MATCHES  (scroll to today on load)
-══════════════════════════════════════ */
-const PP={}  // pending picks per match
+/* ── MATCHES TAB ── */
+const PP={}
 function renderMatches(){
   const el=document.getElementById('p-matches')
   const groups={}
@@ -564,24 +530,23 @@ function renderMatches(){
     ms.forEach(m=>{h+=buildCard(m)})
   })
   el.innerHTML=h
-  // auto-scroll to today's matches on first render
   const hdr=el.querySelector('#todayHdr')
-  if(hdr)setTimeout(()=>hdr.scrollIntoView({behavior:'smooth',block:'start'}),100)
+  if(hdr)setTimeout(()=>hdr.scrollIntoView({behavior:'smooth',block:'start'}),120)
 }
-function todayStr(){const i=nowIST();return`${i.getFullYear()}-${String(i.getMonth()+1).padStart(2,'0')}-${String(i.getDate()).padStart(2,'0')}`}
 
 function buildCard(m){
-  const st=mstat(m)
-  const ht=tm(m.home),at2=tm(m.away)
+  const st=mstat(m),ht=tm(m.home),at2=tm(m.away)
   const res=S.results[m.id],myV=(S.votes[m.id]||{})[CU.code]
   const locked=isLocked(m),allV=S.votes[m.id]||{}
   const hW=res===m.home,aW=res===m.away
-  const chipL={op:'Open · Vote Now',lk:'🔒 Locked',dn:res?`${tm(res).code} Won`:'Result In',ft:'Upcoming'}
+  const isFuture=!m.past&&!locked&&m.date>todayStr()
+  const chipCls=st==='op'&&isFuture?'ft':st
+  const chipLbl={op:isFuture?`Open · Locks ${fmtD(m)}`:'Open · Vote Now',lk:'🔒 Locked',dn:res?`${tm(res).code} Won`:'Result In',ft:'Upcoming'}
 
   let h=`<div class="mc">
     <div class="mh">
       <span class="mm">M${m.id} · ${m.venue} · ${fmtD(m)} · ${fmtT(m)}</span>
-      <span class="chip ${st}">${chipL[st]||'Upcoming'}</span>
+      <span class="chip ${chipCls}">${chipLbl[st]||'Open'}</span>
     </div>
     <div class="mt">
       <div class="mteam" style="opacity:${aW?.4:1}">
@@ -595,9 +560,7 @@ function buildCard(m){
       </div>
     </div>`
 
-  if(st==='ft'){
-    h+=`<div class="pz"><div class="fm">Voting opens ${fmtD(m)} · ${fmtT(m)}</div></div>`
-  } else if(st==='op'){
+  if(st==='op'){
     if(myV){
       const mvt=tm(myV.team)
       h+=`<div class="pz"><div class="mv">
@@ -627,7 +590,7 @@ function buildCard(m){
       </div>`
     }
   } else {
-    // locked or done — show reveal
+    // locked/done — show distribution on match card too
     const total=Object.keys(allV).length
     const hc=Object.values(allV).filter(v=>v.team===m.home).length
     const ac=Object.values(allV).filter(v=>v.team===m.away).length
@@ -635,7 +598,7 @@ function buildCard(m){
     const dog=t=>total>0&&(Object.values(allV).filter(v=>v.team===t).length/total*100)<30
     h+=`<div class="rz">
       <div class="rzh">
-        <span class="rzl">Pick Distribution${total?` · ${total} vote${total!==1?'s':''}`:' · No votes yet'}</span>
+        <span class="rzl">Distribution${total?` · ${total} votes`:' · No votes'}</span>
         <span class="rzb" style="color:${st==='dn'?'var(--grn)':'var(--red)'}">${st==='dn'?'✅ Result In':'🔒 LOCKED'}</span>
       </div>
       <div class="dr">
@@ -672,11 +635,8 @@ function buildChips(m,allV,res){
   }).join('')
 }
 function isDog(m,team,allV){const t=Object.keys(allV).length,c=Object.values(allV).filter(v=>v.team===team).length;return t>0&&(c/t*100)<30}
-function esc(s){return s.replace(/'/g,"\\'")}
 
-/* ══════════════════════════════════════
-   VOTE LOGIC
-══════════════════════════════════════ */
+/* ── VOTE LOGIC ── */
 function pickTeam(mid,team,btn){
   if(!PP[mid])PP[mid]={team:null,conf:1}
   PP[mid].team=team
@@ -705,9 +665,116 @@ function submitVote(mid){
   save();showToast(`🔒 ${p.team} · ${p.conf||1}× locked in!`);renderAll()
 }
 
-/* ══════════════════════════════════════
-   MY PICKS
-══════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   ALL PICKS TAB
+   Shows ALL locked/completed matches with every user's
+   pick visible in a clean grid. Hidden for open matches.
+══════════════════════════════════════════════════════ */
+function renderPicks(){
+  const el=document.getElementById('p-picks')
+  const revealedMatches=MATCHES.filter(m=>isLocked(m))
+  const openCount=MATCHES.filter(m=>!isLocked(m)).length
+
+  let h=`<div class="sh">ALL PICKS — AFTER LOCK</div>`
+
+  // Info banner
+  h+=`<div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:10px 13px;margin-bottom:12px;font-size:11px;color:var(--dim2);line-height:1.6">
+    👀 <strong style="color:var(--txt)">Everyone's picks are shown here after 7:30 PM.</strong><br>
+    ${openCount>0?`${openCount} matches still open for voting — picks hidden until lock time.`:'All matches locked.'}
+  </div>`
+
+  if(!revealedMatches.length){
+    h+=`<div style="text-align:center;padding:50px 20px;color:var(--dim)">
+      <div style="font-size:36px;margin-bottom:12px">🕐</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:8px">PICKS HIDDEN</div>
+      <div style="font-size:13px;line-height:1.6">Today's picks will appear here<br>after 7:30 PM IST</div>
+    </div>`
+    el.innerHTML=h;return
+  }
+
+  // User header row (first names)
+  const userInitials=USERS.map(u=>`<div style="flex:1;text-align:center;font-size:9px;font-weight:800;color:var(--dim2);text-transform:uppercase;letter-spacing:.3px;padding:0 2px">${u.name.slice(0,4)}</div>`).join('')
+
+  // Show most recent locked matches first (reverse)
+  const sorted=[...revealedMatches].reverse()
+
+  sorted.forEach(m=>{
+    const res=S.results[m.id]
+    const allV=S.votes[m.id]||{}
+    const ht=tm(m.home),at2=tm(m.away)
+    const st=mstat(m)
+
+    h+=`<div class="pk-card">
+      <div class="pk-head">
+        <div>
+          <div class="pk-title">M${m.id} · ${ht.code} <span style="color:var(--dim)">vs</span> ${at2.code}</div>
+          <div class="pk-sub">${fmtD(m)} · ${m.venue}${res?' · <span style="color:var(--grn)">'+tm(res).code+' Won</span>':''}</div>
+        </div>
+        <span class="chip ${st}">${st==='dn'&&res?`${tm(res).code} Won`:st==='lk'?'🔒 Locked':'Done'}</span>
+      </div>`
+
+    // User name headers
+    h+=`<div style="display:flex;padding:8px 8px 4px;border-bottom:1px solid var(--b1)">`
+    h+=`<div style="width:0;flex:0"></div>`
+    USERS.forEach(u=>{
+      h+=`<div style="flex:1;text-align:center;font-size:8px;font-weight:800;color:${u.grad.includes('f2b830')?'var(--acc)':'var(--dim2)'};text-transform:uppercase;letter-spacing:.3px;padding:0 1px;line-height:1.2">${u.name.slice(0,5)}</div>`
+    })
+    h+=`</div>`
+
+    // Home team row
+    h+=`<div style="display:flex;align-items:center;padding:6px 8px;border-bottom:1px solid var(--b1)">`
+    h+=`<div style="width:36px;font-size:9px;font-weight:800;color:${ht.light};flex-shrink:0">${ht.code}</div>`
+    USERS.forEach(u=>{
+      const v=allV[u.code]
+      const pickedThis=v&&v.team===m.home
+      const win=pickedThis&&res===m.home
+      const loss=pickedThis&&res&&res!==m.home
+      const pts=win?v.conf*10+(isDog(m,m.home,allV)?5:0):loss?-(v.conf*5):null
+      h+=`<div style="flex:1;text-align:center;padding:0 1px">`
+      if(pickedThis){
+        h+=`<div style="padding:3px 2px;border-radius:5px;font-size:9px;font-weight:800;
+          background:${win?'rgba(29,185,84,.14)':loss?'rgba(232,61,90,.08)':'var(--s2)'};
+          color:${win?'var(--grn)':loss?'var(--red)':'var(--acc)'};line-height:1.2">
+          ${v.conf}×${pts!==null?`<br><span style="font-size:8px">${pts>0?'+':''}${pts}</span>`:''}
+        </div>`
+      } else {
+        h+=`<div style="padding:3px 2px;font-size:8px;color:var(--b2);text-align:center">—</div>`
+      }
+      h+=`</div>`
+    })
+    h+=`</div>`
+
+    // Away team row
+    h+=`<div style="display:flex;align-items:center;padding:6px 8px;">`
+    h+=`<div style="width:36px;font-size:9px;font-weight:800;color:${at2.light};flex-shrink:0">${at2.code}</div>`
+    USERS.forEach(u=>{
+      const v=allV[u.code]
+      const pickedThis=v&&v.team===m.away
+      const win=pickedThis&&res===m.away
+      const loss=pickedThis&&res&&res!==m.away
+      const pts=win?v.conf*10+(isDog(m,m.away,allV)?5:0):loss?-(v.conf*5):null
+      h+=`<div style="flex:1;text-align:center;padding:0 1px">`
+      if(pickedThis){
+        h+=`<div style="padding:3px 2px;border-radius:5px;font-size:9px;font-weight:800;
+          background:${win?'rgba(29,185,84,.14)':loss?'rgba(232,61,90,.08)':'var(--s2)'};
+          color:${win?'var(--grn)':loss?'var(--red)':'var(--acc)'};line-height:1.2">
+          ${v.conf}×${pts!==null?`<br><span style="font-size:8px">${pts>0?'+':''}${pts}</span>`:''}
+        </div>`
+      } else if(!v){
+        h+=`<div style="padding:3px 2px;font-size:8px;color:var(--b2);text-align:center">—</div>`
+      } else {
+        h+=`<div style="padding:3px 2px;font-size:8px;color:var(--b2);text-align:center">—</div>`
+      }
+      h+=`</div>`
+    })
+    h+=`</div>`
+    h+=`</div>` // pk-card
+  })
+
+  el.innerHTML=h
+}
+
+/* ── MY PICKS TAB ── */
 function renderMyPicks(){
   const el=document.getElementById('p-mypicks')
   const st=S.stats[CU.code],pts=S.points[CU.code]
@@ -746,15 +813,12 @@ function renderMyPicks(){
   el.innerHTML=h
 }
 
-/* ══════════════════════════════════════
-   STANDINGS — always visible to everyone
-══════════════════════════════════════ */
+/* ── STANDINGS (always visible) ── */
 function renderStandings(){
   const el=document.getElementById('p-standings')
   const ranked=USERS.map(u=>({...u,pts:S.points[u.code],w:S.stats[u.code].w,l:S.stats[u.code].l,
     voted:MATCHES.filter(m=>(S.votes[m.id]||{})[u.code]).length}))
     .sort((a,b)=>b.pts-a.pts||a.code.localeCompare(b.code))
-
   let h=`<div class="sh">STANDINGS · IPL 2026</div>`
   ranked.forEach((u,i)=>{
     const me=u.code===CU.code,first=i===0
@@ -773,166 +837,92 @@ function renderStandings(){
     <div class="skr"><span style="color:var(--dim2)">Correct pick</span><span style="color:var(--grn);font-weight:800">+10 pts base</span></div>
     <div class="skr"><span style="color:var(--dim2)">Wrong pick</span><span style="color:var(--red);font-weight:800">−5 pts base</span></div>
     <div class="skr"><span style="color:var(--dim2)">Confidence multiplier</span><span style="color:var(--blue);font-weight:800">×1 / ×2 / ×3</span></div>
-    <div class="skr"><span style="color:var(--dim2)">Underdog bonus 🐶</span><span style="color:var(--acc);font-weight:800">+5 if &lt;30% picked winner</span></div>
+    <div class="skr"><span style="color:var(--dim2)">Underdog 🐶 bonus</span><span style="color:var(--acc);font-weight:800">+5 if &lt;30% picked winner</span></div>
     <div class="skr" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--b1)">
-      <span style="color:var(--dim2)">Who voted for who</span><span style="color:var(--dim2);font-weight:700">Revealed after match start</span>
+      <span style="color:var(--dim2)">Picks revealed</span><span style="color:var(--dim2);font-weight:700">After match start time</span>
     </div>
   </div>`
   el.innerHTML=h
 }
 
-/* ══════════════════════════════════════
-   ADMIN — Result entry (PRAT321 only)
-   ✅ Points auto-calculate on tap
-   ✅ Undo button reverses all points
-══════════════════════════════════════ */
+/* ── ADMIN ── */
 function renderAdmin(){
   const el=document.getElementById('p-admin')
   const pending=MATCHES.filter(m=>isLocked(m)&&!S.results[m.id])
   const done=MATCHES.filter(m=>S.results[m.id])
-  const upcoming=MATCHES.filter(m=>!isLocked(m))
-
-  let h=`
-  <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;margin-top:4px">
+  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;margin-top:4px">
     <div class="sh" style="margin:0">RESULT ENTRY</div>
-    <span style="font-size:9px;background:rgba(232,61,90,.12);color:var(--red);padding:2px 8px;border-radius:20px;font-weight:800;text-transform:uppercase">PRAT321 ONLY</span>
+    <span style="font-size:9px;background:rgba(232,61,90,.12);color:var(--red);padding:2px 8px;border-radius:20px;font-weight:800;text-transform:uppercase">PRAT ONLY</span>
   </div>
   <div style="background:var(--s1);border:1px solid var(--b1);border-radius:11px;padding:9px 12px;margin-bottom:13px;display:grid;grid-template-columns:repeat(3,1fr);text-align:center">
     <div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--red)">${pending.length}</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Need Result</div></div>
     <div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--grn)">${done.length}</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Done</div></div>
-    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--blue)">${upcoming.length}</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Upcoming</div></div>
+    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--blue)">${MATCHES.filter(m=>!isLocked(m)).length}</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Upcoming</div></div>
   </div>`
-
-  if(pending.length){
-    h+=`<div class="sh">⚠️ AWAITING YOUR RESULT</div>`
-    pending.forEach(m=>{h+=adminCard(m)})
-  }
-  if(done.length){
-    h+=`<div class="sh">✅ RESULTS ENTERED</div>`
-    done.slice().reverse().forEach(m=>{h+=adminCard(m)})
-  }
-  if(upcoming.length){
-    h+=`<div class="sh">🔜 UPCOMING (not locked yet)</div>`
-    upcoming.slice(0,5).forEach(m=>{h+=adminCard(m)})
-    if(upcoming.length>5)h+=`<div style="text-align:center;padding:8px;font-size:11px;color:var(--dim)">…and ${upcoming.length-5} more upcoming matches</div>`
-  }
+  if(pending.length){h+=`<div class="sh">⚠️ AWAITING RESULT</div>`;pending.forEach(m=>{h+=adminCard(m)})}
+  if(done.length){h+=`<div class="sh">✅ RESULTS ENTERED</div>`;done.slice().reverse().forEach(m=>{h+=adminCard(m)})}
   el.innerHTML=h
 }
-
 function adminCard(m){
   const res=S.results[m.id],locked=isLocked(m),ht=tm(m.home),at2=tm(m.away)
-  const allV=S.votes[m.id]||{},total=Object.keys(allV).length
-  if(res){
-    return`<div class="ac">
-      <div class="ach"><div class="act">M${m.id} · ${ht.code} vs ${at2.code} · ${fmtD(m)}</div><span class="chip dn">Done</span></div>
-      <div class="db">
-        <span>✅ ${res} won · ${total} pick${total!==1?'s':''} · Points auto-calculated</span>
-        <button class="ub" onclick="askUndo(${m.id})">Undo?</button>
-      </div>
-    </div>`
-  }
+  const total=Object.keys(S.votes[m.id]||{}).length
+  if(res){return`<div class="ac">
+    <div class="ach"><div class="act">M${m.id} · ${ht.code} vs ${at2.code} · ${fmtD(m)}</div><span class="chip dn">Done</span></div>
+    <div class="db"><span>✅ ${res} won · ${total} picks · Points calculated</span><button class="ub" onclick="askUndo(${m.id})">Undo?</button></div>
+  </div>`}
   return`<div class="ac">
-    <div class="ach">
-      <div class="act">M${m.id} · ${m.home} vs ${m.away}</div>
-      <span class="chip ${locked?'lk':'ft'}">${locked?`Locked · ${total} vote${total!==1?'s':''}`:'Not Locked Yet'}</span>
-    </div>
+    <div class="ach"><div class="act">M${m.id} · ${m.home} vs ${m.away}</div>
+    <span class="chip ${locked?'lk':'op'}">${locked?`Locked · ${total} votes`:'Not Locked'}</span></div>
     <div style="font-size:10px;color:var(--dim2);margin-bottom:9px">${fmtD(m)} · ${fmtT(m)} · ${m.venue}</div>
     <div class="wg">
-      <button class="wb" ${!locked?'disabled':''} onclick="enterResult(${m.id},'${esc(m.home)}',this)"
+      <button class="wb" ${!locked?'disabled':''} onclick="enterResult(${m.id},'${esc(m.home)}')"
         style="background:linear-gradient(135deg,${ht.dark}55,${ht.dark});color:${ht.light};border:1.5px solid ${ht.acc}44">
-        ${ht.code}<span class="wbs">${locked?'👆 Tap = Winner':'Not locked yet'}</span>
-      </button>
-      <button class="wb" ${!locked?'disabled':''} onclick="enterResult(${m.id},'${esc(m.away)}',this)"
+        ${ht.code}<span class="wbs">${locked?'👆 Tap = Winner':'Not locked'}</span></button>
+      <button class="wb" ${!locked?'disabled':''} onclick="enterResult(${m.id},'${esc(m.away)}')"
         style="background:linear-gradient(135deg,${at2.dark}55,${at2.dark});color:${at2.light};border:1.5px solid ${at2.acc}44">
-        ${at2.code}<span class="wbs">${locked?'👆 Tap = Winner':'Not locked yet'}</span>
-      </button>
+        ${at2.code}<span class="wbs">${locked?'👆 Tap = Winner':'Not locked'}</span></button>
     </div>
   </div>`
 }
-
-/* ══════════════════════════════════════
-   ENTER RESULT — auto-calculates all points
-══════════════════════════════════════ */
 function enterResult(mid,winner){
   const m=MATCHES.find(x=>x.id===mid)
-  if(!m){showToast('Match not found');return}
-  if(!isLocked(m)){showToast('⏰ Match not locked yet — wait for 7:30 PM IST');return}
-  if(S.results[mid]){showToast('Result already entered. Use Undo to change.');return}
-
+  if(!m||!isLocked(m)){showToast('⏰ Not locked yet!');return}
+  if(S.results[mid]){showToast('Already entered. Use Undo to change.');return}
   S.results[mid]=winner
-  const allV=S.votes[mid]||{}
-  const total=Object.keys(allV).length
+  const allV=S.votes[mid]||{},total=Object.keys(allV).length
   const wc=Object.values(allV).filter(v=>v.team===winner).length
   const dog=total>0&&(wc/total*100)<30
-
-  // ✅ AUTO-CALCULATE POINTS FOR EVERY USER WHO VOTED
   let correct=0,wrong=0
   Object.entries(allV).forEach(([code,v])=>{
-    if(v.team===winner){
-      const p=v.conf*10+(dog?5:0)
-      S.points[code]=(S.points[code]||0)+p
-      S.stats[code].w=(S.stats[code].w||0)+1
-      correct++
-    } else {
-      const p=-(v.conf*5)
-      S.points[code]=(S.points[code]||0)+p
-      S.stats[code].l=(S.stats[code].l||0)+1
-      wrong++
-    }
+    if(v.team===winner){S.points[code]=(S.points[code]||0)+v.conf*10+(dog?5:0);S.stats[code].w=(S.stats[code].w||0)+1;correct++}
+    else{S.points[code]=(S.points[code]||0)-(v.conf*5);S.stats[code].l=(S.stats[code].l||0)+1;wrong++}
   })
-
-  save()
-  showToast(`✅ ${winner} won!`)
-  setTimeout(()=>showToast(`🎯 Points updated: ${correct} correct, ${wrong} wrong${dog?' · 🐶 Underdog bonus applied!':''}}`),2200)
+  save();showToast(`✅ ${winner} won!`)
+  setTimeout(()=>showToast(`🎯 ${correct} correct, ${wrong} wrong${dog?' · 🐶 Underdog bonus!':''}!`),2200)
   renderAll()
 }
-
-/* ══════════════════════════════════════
-   UNDO RESULT (safety net for PRAT)
-══════════════════════════════════════ */
 function askUndo(mid){
-  undoMid=mid
-  const m=MATCHES.find(x=>x.id===mid)
-  document.getElementById('modal-msg').textContent=`This will remove "${S.results[mid]} won" from M${mid} (${m.home} vs ${m.away}) and reverse all points for this match. Are you sure?`
+  undoMid=mid;const m=MATCHES.find(x=>x.id===mid)
+  document.getElementById('modal-msg').textContent=`Remove "${S.results[mid]} won" from M${mid} (${m.home} vs ${m.away}) and reverse all points?`
   document.getElementById('overlay').classList.add('open')
 }
 function closeModal(){document.getElementById('overlay').classList.remove('open');undoMid=null}
 function confirmUndo(){
   if(!undoMid)return
-  const mid=undoMid,allV=S.votes[mid]||{}
-  const winner=S.results[mid]
-  if(!winner){closeModal();return}
-  const total=Object.keys(allV).length
-  const wc=Object.values(allV).filter(v=>v.team===winner).length
+  const mid=undoMid,allV=S.votes[mid]||{},winner=S.results[mid]
+  const total=Object.keys(allV).length,wc=Object.values(allV).filter(v=>v.team===winner).length
   const dog=total>0&&(wc/total*100)<30
-
-  // Reverse all points
   Object.entries(allV).forEach(([code,v])=>{
-    if(v.team===winner){
-      const p=v.conf*10+(dog?5:0)
-      S.points[code]=(S.points[code]||0)-p
-      S.stats[code].w=Math.max(0,(S.stats[code].w||0)-1)
-    } else {
-      const p=-(v.conf*5)
-      S.points[code]=(S.points[code]||0)-p
-      S.stats[code].l=Math.max(0,(S.stats[code].l||0)-1)
-    }
+    if(v.team===winner){S.points[code]=(S.points[code]||0)-(v.conf*10+(dog?5:0));S.stats[code].w=Math.max(0,(S.stats[code].w||0)-1)}
+    else{S.points[code]=(S.points[code]||0)+(v.conf*5);S.stats[code].l=Math.max(0,(S.stats[code].l||0)-1)}
   })
   delete S.results[mid]
-  save();closeModal()
-  showToast(`↩️ Result undone for M${mid} — re-enter the correct winner`)
-  renderAll()
+  save();closeModal();showToast(`↩️ Result undone for M${mid}`);renderAll()
 }
 
-/* ══════════════════════════════════════
-   TOAST
-══════════════════════════════════════ */
+/* ── TOAST ── */
 let TT
-function showToast(msg){
-  const t=document.getElementById('toast')
-  t.textContent=msg;t.classList.add('show')
-  clearTimeout(TT);TT=setTimeout(()=>t.classList.remove('show'),3200)
-}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(TT);TT=setTimeout(()=>t.classList.remove('show'),3200)}
 </script>
 </body>
 </html>
