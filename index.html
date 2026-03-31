@@ -416,7 +416,7 @@ function tm(n){return TM[n]||{code:n.slice(0,3).toUpperCase(),dark:'#222',light:
 function esc(s){return s.replace(/'/g,"\\'")}
 
 /* ── STATE (localStorage — never wiped on logout) ── */
-const KEY='ipl26_v8'
+const KEY='ipl26_v8'  // same key — no data loss
 function loadS(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s)return s}catch{}return null}
 function blankS(){return{votes:{},results:{},points:Object.fromEntries(USERS.map(u=>[u.code,0])),stats:Object.fromEntries(USERS.map(u=>[u.code,{w:0,l:0}]))}}
 let S=loadS()||blankS()
@@ -850,15 +850,83 @@ function renderAdmin(){
   const el=document.getElementById('p-admin')
   const pending=MATCHES.filter(m=>isLocked(m)&&!S.results[m.id])
   const done=MATCHES.filter(m=>S.results[m.id])
-  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;margin-top:4px">
-    <div class="sh" style="margin:0">RESULT ENTRY</div>
+  const openMatches=MATCHES.filter(m=>!isLocked(m))
+
+  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:4px">
+    <div class="sh" style="margin:0">ADMIN PANEL</div>
     <span style="font-size:9px;background:rgba(232,61,90,.12);color:var(--red);padding:2px 8px;border-radius:20px;font-weight:800;text-transform:uppercase">PRAT ONLY</span>
-  </div>
-  <div style="background:var(--s1);border:1px solid var(--b1);border-radius:11px;padding:9px 12px;margin-bottom:13px;display:grid;grid-template-columns:repeat(3,1fr);text-align:center">
+  </div>`
+
+  /* ══ LIVE VOTER TRACKER ══
+     For every open (unlocked) match, show who has voted and who hasn't.
+     Refreshes every 30s with the clock. No team revealed — just ✓ / ✗.
+  */
+  if(openMatches.length){
+    h+=`<div class="sh" style="color:var(--acc)">🔴 LIVE — WHO HAS VOTED</div>`
+    h+=`<div style="background:var(--s1);border:1px solid var(--b1);border-radius:13px;overflow:hidden;margin-bottom:14px">`
+
+    openMatches.slice(0,10).forEach((m,idx)=>{
+      const allV=S.votes[m.id]||{}
+      const votedCodes=Object.keys(allV)
+      const votedCount=votedCodes.length
+      const total=USERS.length
+      const pct=Math.round(votedCount/total*100)
+      const isFuture=m.date>todayStr()
+
+      h+=`<div style="padding:10px 13px;${idx>0?'border-top:1px solid var(--b1)':''}">`
+      // Match header row
+      h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div>
+          <span style="font-size:12px;font-weight:800">M${m.id} · ${tm(m.home).code} vs ${tm(m.away).code}</span>
+          <span style="font-size:10px;color:var(--dim);margin-left:6px">${fmtD(m)} · ${fmtT(m)}</span>
+        </div>
+        <span style="font-size:11px;font-weight:800;color:${votedCount===total?'var(--grn)':isFuture?'var(--blue)':'var(--acc)'}">${votedCount}/${total}</span>
+      </div>`
+
+      // Progress bar
+      h+=`<div style="height:4px;background:var(--s3);border-radius:2px;margin-bottom:9px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${votedCount===total?'var(--grn)':'var(--acc)'};border-radius:2px;transition:width .5s"></div>
+      </div>`
+
+      // User chips — green tick if voted, red X if not
+      h+=`<div style="display:flex;flex-wrap:wrap;gap:5px">`
+      USERS.forEach(u=>{
+        const voted=!!allV[u.code]
+        h+=`<div style="display:flex;align-items:center;gap:4px;padding:4px 9px 4px 5px;border-radius:20px;
+          background:${voted?'rgba(29,185,84,.1)':'rgba(94,95,122,.12)'};
+          border:1px solid ${voted?'rgba(29,185,84,.3)':'var(--b1)'};
+          font-size:11px;font-weight:700;color:${voted?'var(--grn)':'var(--dim)'}">
+          <div style="width:16px;height:16px;border-radius:50%;background:${u.grad};display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;color:#fff;flex-shrink:0">${u.name.charAt(0)}</div>
+          ${u.name.split(' ')[0]}
+          <span style="font-size:12px">${voted?'✓':'✗'}</span>
+        </div>`
+      })
+      h+=`</div>` // flex wrap
+
+      // If anyone hasn't voted and match is today, show nudge
+      const notVoted=USERS.filter(u=>!allV[u.code])
+      if(notVoted.length>0&&!isFuture){
+        h+=`<div style="margin-top:8px;font-size:10px;color:var(--red);font-weight:700">
+          ⏰ Not voted yet: ${notVoted.map(u=>u.name.split(' ')[0]).join(', ')}
+        </div>`
+      }
+
+      h+=`</div>` // padding div
+    })
+
+    if(openMatches.length>10){
+      h+=`<div style="padding:8px 13px;border-top:1px solid var(--b1);font-size:11px;color:var(--dim);text-align:center">+${openMatches.length-10} more upcoming matches</div>`
+    }
+    h+=`</div>` // card
+  }
+
+  /* ══ MATCH STATS SUMMARY ══ */
+  h+=`<div style="background:var(--s1);border:1px solid var(--b1);border-radius:11px;padding:9px 12px;margin-bottom:13px;display:grid;grid-template-columns:repeat(3,1fr);text-align:center">
     <div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--red)">${pending.length}</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Need Result</div></div>
     <div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--grn)">${done.length}</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Done</div></div>
-    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--blue)">${MATCHES.filter(m=>!isLocked(m)).length}</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Upcoming</div></div>
+    <div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--blue)">${openMatches.length}</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Upcoming</div></div>
   </div>`
+
   if(pending.length){h+=`<div class="sh">⚠️ AWAITING RESULT</div>`;pending.forEach(m=>{h+=adminCard(m)})}
   if(done.length){h+=`<div class="sh">✅ RESULTS ENTERED</div>`;done.slice().reverse().forEach(m=>{h+=adminCard(m)})}
   el.innerHTML=h
