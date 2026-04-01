@@ -831,11 +831,13 @@ function renderStandings(){
 ══════════════════════════════════════════════════════════ */
 function renderAdmin(){
   const el=document.getElementById('p-admin')
-  // ALL matches needing a result (locked, no winner) — includes past + today + future once locked
-  const needResult=DB.matches.filter(m=>isLocked(m)&&!m.winner)
+  // Admin sees ALL matches without a winner — sorted by date
+  const needResult=DB.matches.filter(m=>!m.winner)   // every match, locked or not
   const done=DB.matches.filter(m=>m.winner)
   const openMatches=DB.matches.filter(m=>!isLocked(m))
-  const pending=needResult  // alias for stats bar
+  const lockedNeedResult=needResult.filter(m=>isLocked(m))    // locked, needs result NOW
+  const upcomingNeedResult=needResult.filter(m=>!isLocked(m)) // future — for reference
+  const pending=lockedNeedResult  // stat badge = only locked ones
 
   let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:4px">
     <div class="sh" style="margin:0">ADMIN PANEL</div>
@@ -888,8 +890,26 @@ function renderAdmin(){
     <div><div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--blue)">${openMatches.length}</div><div style="font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Upcoming</div></div>
   </div>`
 
-  if(pending.length){h+=`<div class="sh">⚠️ AWAITING RESULT</div>`;pending.forEach(m=>h+=adminCard(m))}
-  if(done.length){h+=`<div class="sh">✅ RESULTS ENTERED</div>`;[...done].reverse().forEach(m=>h+=adminCard(m))}
+  // Locked matches needing result — highest priority
+  if(lockedNeedResult.length){
+    h+=`<div class="sh" style="color:var(--red)">⚠️ LOCKED — ENTER RESULT</div>`
+    lockedNeedResult.forEach(m=>h+=adminCard(m))
+  }
+
+  // Upcoming matches — shown for reference, buttons disabled until locked
+  if(upcomingNeedResult.length){
+    h+=`<div class="sh" style="color:var(--blue)">📅 UPCOMING MATCHES</div>`
+    h+=`<div style="background:rgba(66,133,244,.06);border:1px solid rgba(66,133,244,.15);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:var(--dim2)">
+      Buttons unlock at 7:30 PM IST on match day. All ${upcomingNeedResult.length} upcoming matches shown below.
+    </div>`
+    upcomingNeedResult.forEach(m=>h+=adminCard(m))
+  }
+
+  // Done
+  if(done.length){
+    h+=`<div class="sh">✅ RESULTS ENTERED</div>`
+    ;[...done].reverse().forEach(m=>h+=adminCard(m))
+  }
   el.innerHTML=h
 }
 
@@ -904,7 +924,7 @@ function adminCard(m){
   const notVotedNames=USERS.filter(u=>!allV.find(v=>v.user_code===u.code)).map(u=>u.name)
   return`<div class="ac">
     <div class="ach"><div class="act">M${m.id} · ${m.home_team} vs ${m.away_team}</div>
-    <span class="chip ${locked?'lk':'op'}">${locked?`Locked · ${total} votes`:`Open · ${total} votes`}</span></div>
+    <span class="chip ${locked?'lk':'ft'}">${locked?`🔒 Locked · ${total} votes`:`Upcoming · ${total} votes`}</span></div>
     <div style="font-size:10px;color:var(--dim2);margin-bottom:7px">${fmtD(m)} · ${fmtT(m)} · ${m.venue}</div>
     ${total>0?`<div style="margin-bottom:10px;font-size:11px;line-height:1.8">
       ${votedNames.length?`<span style="color:var(--grn);font-weight:700">✓ ${votedNames.join(', ')}</span><br>`:''}
