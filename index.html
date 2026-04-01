@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>IPL 2026 · Family League</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root{
   --bg:#08090f;--s1:#0f101c;--s2:#171828;--s3:#1e2030;
@@ -317,8 +317,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
    ⚙️  CONFIGURATION — Replace with your Supabase values
    Get from: supabase.com → your project → Settings → API
 ══════════════════════════════════════════════════════════ */
-const SUPABASE_URL  = 'https://YOUR_PROJECT_ID.supabase.co'
-const SUPABASE_ANON = 'YOUR_ANON_KEY_HERE'
+const SUPABASE_URL  = 'https://kpfnoppmfvkxdssaabef.supabase.co'
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwZm5vcHBtZnZreGRzc2FhYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODEyODgsImV4cCI6MjA5MDQ1NzI4OH0.Prjaq85U5EDTKdRrn4tqiO0p-7ktlE1d5yjBfXlLVp4'
 
 /* ══════════════════════════════════════════════════════════
    USERS
@@ -362,25 +362,37 @@ const PP = {}  // pending picks (UI state only)
    INIT
 ══════════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', async () => {
+  const loadtxt = document.querySelector('.loadtxt')
   try {
-    sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
+    // Supabase UMD exposes window.supabase
+    if(!window.supabase) throw new Error('Supabase SDK not loaded')
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
+    loadtxt.textContent = 'LOADING DATA…'
     await refreshDB()
-    showScreen('login')
+    // Show login screen
+    document.getElementById('sLoad').classList.replace('on','off')
+    document.getElementById('sL').classList.replace('off','on')
   } catch(e) {
-    document.querySelector('.loadtxt').textContent = 'CONNECTION FAILED'
-    console.error(e)
+    loadtxt.textContent = 'FAILED: ' + e.message
+    loadtxt.style.color = '#e83d5a'
+    loadtxt.style.fontSize = '12px'
+    loadtxt.style.padding = '0 20px'
+    loadtxt.style.textAlign = 'center'
+    console.error('Init error:', e)
   }
 })
 
 async function refreshDB() {
-  const [{ data: matches }, { data: votes }, { data: users }] = await Promise.all([
+  const [mRes, vRes, uRes] = await Promise.all([
     sb.from('matches').select('*').order('id'),
     sb.from('votes').select('*'),
     sb.from('users').select('*'),
   ])
-  DB.matches = matches || []
-  DB.votes   = votes   || []
-  DB.users   = users   || []
+  if(mRes.error) throw new Error('matches: ' + mRes.error.message)
+  if(uRes.error) throw new Error('users: ' + uRes.error.message)
+  DB.matches = mRes.data || []
+  DB.votes   = vRes.data || []
+  DB.users   = uRes.data || []
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -937,4 +949,82 @@ async function enterResult(mid,winner){
       // Increment using RPC-style — simpler: just read then write
       const u=DB.users.find(x=>x.code===v.user_code)
       await sb.from('users').update({
-        total_points
+        total_points:(u?.total_points||0)+pts,
+        correct:(u?.correct||0)+1
+      }).eq('code',v.user_code)
+      correct++
+    } else {
+      const pts=v.confidence*5
+      await sb.from('votes').update({points_awarded:-pts}).eq('id',v.id)
+      const u=DB.users.find(x=>x.code===v.user_code)
+      await sb.from('users').update({
+        total_points:(u?.total_points||0)-pts,
+        wrong:(u?.wrong||0)+1
+      }).eq('code',v.user_code)
+      wrong++
+    }
+  }
+
+  showToast(`✅ ${winner} won!`)
+  setTimeout(()=>showToast(`🎯 ${correct} correct, ${wrong} wrong${dog?' · 🐶 Underdog bonus!':''}!`),2200)
+  await refreshDB();renderAll()
+}
+
+/* ── UNDO ── */
+function askUndo(mid){
+  undoMid=mid;const m=DB.matches.find(x=>x.id===mid)
+  document.getElementById('modal-msg').textContent=`Remove "${m.winner} won" from M${mid} and reverse all points?`
+  document.getElementById('overlay').classList.add('open')
+}
+function closeModal(){document.getElementById('overlay').classList.remove('open');undoMid=null}
+async function confirmUndo(){
+  if(!undoMid)return
+  const mid=undoMid,m=DB.matches.find(x=>x.id===mid)
+  const allV=matchVotes(mid),winner=m.winner
+  const total=allV.length,wc=allV.filter(v=>v.team===winner).length
+  const dog=total>0&&(wc/total*100)<30
+  for(const v of allV){
+    const u=DB.users.find(x=>x.code===v.user_code)
+    if(v.team===winner){
+      const pts=v.confidence*10+(dog?5:0)
+      await sb.from('users').update({total_points:(u?.total_points||0)-pts,correct:Math.max(0,(u?.correct||0)-1)}).eq('code',v.user_code)
+    } else {
+      const pts=v.confidence*5
+      await sb.from('users').update({total_points:(u?.total_points||0)+pts,wrong:Math.max(0,(u?.wrong||0)-1)}).eq('code',v.user_code)
+    }
+    await sb.from('votes').update({points_awarded:null}).eq('id',v.id)
+  }
+  await sb.from('matches').update({winner:null}).eq('id',mid)
+  closeModal();showToast(`↩️ Result undone for M${mid}`)
+  await refreshDB();renderAll()
+}
+
+/* ── RESET VOTES (admin) ── */
+let resetMid=null
+function askResetVotes(mid){
+  resetMid=mid
+  const m=DB.matches.find(x=>x.id===mid)
+  const total=matchVotes(mid).length
+  document.getElementById('modal2-msg').textContent=
+    `Delete all ${total} vote${total!==1?'s':''} for M${mid} (${m.home_team} vs ${m.away_team})? Everyone can re-vote from scratch. This cannot be undone.`
+  document.getElementById('overlay2').classList.add('open')
+}
+function closeModal2(){document.getElementById('overlay2').classList.remove('open');resetMid=null}
+async function confirmResetVotes(){
+  if(!resetMid)return
+  const mid=resetMid
+  const {error}=await sb.from('votes').delete().eq('match_id',mid)
+  if(error){showToast('❌ Reset failed: '+error.message);closeModal2();return}
+  closeModal2()
+  showToast(`🗑 All votes cleared for M${mid} — everyone can re-vote`)
+  await refreshDB();renderAll()
+}
+
+/* ── TOAST ── */
+let TT
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(TT);TT=setTimeout(()=>t.classList.remove('show'),3200)}
+
+/* screen helper — not needed, inline transitions used directly */
+</script>
+</body>
+</html>
