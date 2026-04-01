@@ -297,6 +297,18 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
     </div>
   </div>
 </div>
+
+<!-- Reset votes modal -->
+<div class="overlay" id="overlay2">
+  <div class="modal">
+    <h3>Reset All Votes?</h3>
+    <p id="modal2-msg">This will delete all votes for this match. Everyone can vote again from scratch.</p>
+    <div class="mbtns">
+      <button class="mbcancel" onclick="closeModal2()">Cancel</button>
+      <button class="mbconfirm" onclick="confirmResetVotes()">Yes, Reset</button>
+    </div>
+  </div>
+</div>
 </div>
 <div id="toast"></div>
 
@@ -305,8 +317,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
    ⚙️  CONFIGURATION — Replace with your Supabase values
    Get from: supabase.com → your project → Settings → API
 ══════════════════════════════════════════════════════════ */
-const SUPABASE_URL  = 'https://kpfnoppmfvkxdssaabef.supabase.co'
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwZm5vcHBtZnZreGRzc2FhYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODEyODgsImV4cCI6MjA5MDQ1NzI4OH0.Prjaq85U5EDTKdRrn4tqiO0p-7ktlE1d5yjBfXlLVp4'
+const SUPABASE_URL  = 'https://YOUR_PROJECT_ID.supabase.co'
+const SUPABASE_ANON = 'YOUR_ANON_KEY_HERE'
 
 /* ══════════════════════════════════════════════════════════
    USERS
@@ -543,34 +555,38 @@ function buildCard(m){
     </div>`
 
   if(st==='op'){
-    if(mv){
-      const mvt=tm(mv.team)
-      h+=`<div class="pz"><div class="mv">
-        <span class="mvl">Your pick</span>
-        <div class="mvi">
-          <span class="mvt" style="color:${mvt.light}">${mv.team}</span>
-          <span class="mvc">${mv.confidence}×</span>
-          <span class="mvk">✓ Locked In</span>
+    // Always show full vote form — pre-selected if already voted. Changeable until 7:30 PM.
+    const curTeam = mv ? mv.team : (PP[m.id]?.team || null)
+    const curConf  = mv ? mv.confidence : (PP[m.id]?.conf || 1)
+    const isUpdate = !!mv
+    if(mv && !PP[m.id]) PP[m.id] = {team:mv.team, conf:mv.confidence}
+    const selHome = curTeam === m.home_team
+    const selAway = curTeam === m.away_team
+    const btnLabel = curTeam
+      ? (isUpdate ? `Update Pick: ${tm(curTeam).code} · ${curConf}×` : `Lock In: ${tm(curTeam).code} · ${curConf}×`)
+      : 'Select a team first'
+    h+=`<div class="pz">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding-top:9px;margin-bottom:7px">
+        <span class="pzl" style="padding-top:0;margin-bottom:0">Your Prediction</span>
+        ${isUpdate?`<span style="font-size:9px;color:var(--grn);font-weight:700;background:rgba(29,185,84,.08);padding:2px 8px;border-radius:20px">✓ Saved · change anytime</span>`:''}
+      </div>
+      <div class="pg">
+        <button class="pb ${selHome?'sel':''}" id="pb-${m.id}-h" onclick="pickTeam(${m.id},'${esc(m.home_team)}',this)">${ht.code}<br><small style="font-size:9px;font-weight:600;opacity:.75">${m.home_team}</small></button>
+        <button class="pb ${selAway?'sel':''}" id="pb-${m.id}-a" onclick="pickTeam(${m.id},'${esc(m.away_team)}',this)">${at2.code}<br><small style="font-size:9px;font-weight:600;opacity:.75">${m.away_team}</small></button>
+      </div>
+      <div class="cr">
+        <span class="cl">Confidence:</span>
+        <div class="cg">
+          <button class="cb ${curConf===1?'sel':''}" onclick="pickConf(${m.id},1,this)">1×</button>
+          <button class="cb ${curConf===2?'sel':''}" onclick="pickConf(${m.id},2,this)">2×</button>
+          <button class="cb ${curConf===3?'sel':''}" onclick="pickConf(${m.id},3,this)">3×</button>
         </div>
-      </div></div>`
-    } else {
-      h+=`<div class="pz">
-        <div class="pzl">Your Prediction</div>
-        <div class="pg">
-          <button class="pb" onclick="pickTeam(${m.id},'${esc(m.home_team)}',this)">${ht.code}<br><small style="font-size:9px;font-weight:600;opacity:.75">${m.home_team}</small></button>
-          <button class="pb" onclick="pickTeam(${m.id},'${esc(m.away_team)}',this)">${at2.code}<br><small style="font-size:9px;font-weight:600;opacity:.75">${m.away_team}</small></button>
-        </div>
-        <div class="cr">
-          <span class="cl">Confidence:</span>
-          <div class="cg">
-            <button class="cb sel" onclick="pickConf(${m.id},1,this)">1×</button>
-            <button class="cb" onclick="pickConf(${m.id},2,this)">2×</button>
-            <button class="cb" onclick="pickConf(${m.id},3,this)">3×</button>
-          </div>
-        </div>
-        <button class="lkb" id="lk${m.id}" onclick="submitVote(${m.id})" disabled>Select a team first</button>
-      </div>`
-    }
+      </div>
+      <button class="lkb" id="lk${m.id}" onclick="submitVote(${m.id})" ${curTeam?'':'disabled'}
+        style="${isUpdate?'background:linear-gradient(135deg,#4285f4,#6a3de8)':''}">
+        ${btnLabel}
+      </button>
+    </div>`
   } else {
     const allV=matchVotes(m.id),total=allV.length
     const hc=allV.filter(v=>v.team===m.home_team).length
@@ -633,20 +649,34 @@ function pickConf(mid,conf,btn){
 function refreshLk(mid){
   const btn=document.getElementById('lk'+mid);if(!btn)return
   const p=PP[mid]
-  if(p&&p.team){btn.disabled=false;btn.textContent=`Lock In: ${tm(p.team).code} · ${p.conf||1}× Confidence`}
-  else{btn.disabled=true;btn.textContent='Select a team first'}
+  const existing=myVote(mid)
+  if(p&&p.team){
+    btn.disabled=false
+    const isUpdate=!!existing
+    btn.textContent=isUpdate?`Update Pick: ${tm(p.team).code} · ${p.conf||1}×`:`Lock In: ${tm(p.team).code} · ${p.conf||1}×`
+    btn.style.background=isUpdate?'linear-gradient(135deg,#4285f4,#6a3de8)':'linear-gradient(135deg,var(--acc),var(--red))'
+  } else {
+    btn.disabled=true
+    btn.textContent='Select a team first'
+    btn.style.background='linear-gradient(135deg,var(--acc),var(--red))'
+  }
 }
 async function submitVote(mid){
   const p=PP[mid];if(!p||!p.team)return
   const m=DB.matches.find(x=>x.id===mid)
-  if(!m||isLocked(m)){showToast('⏰ Voting closed!');return}
-  if(myVote(mid)){showToast('⛔ Already voted — cannot change!');return}
-  // Write to Supabase
-  const {error}=await sb.from('votes').insert({
-    match_id:mid, user_code:CU.code, team:p.team, confidence:p.conf||1
-  })
+  if(!m||isLocked(m)){showToast('⏰ Voting closed at 7:30 PM!');return}
+  const existing=myVote(mid)
+  const isUpdate=!!existing
+  // upsert — inserts if new, updates if exists (match_id + user_code is unique key)
+  const {error}=await sb.from('votes').upsert(
+    {match_id:mid, user_code:CU.code, team:p.team, confidence:p.conf||1},
+    {onConflict:'match_id,user_code'}
+  )
   if(error){showToast('❌ Failed to save. Try again.');console.error(error);return}
-  showToast(`🔒 ${p.team} · ${p.conf||1}× locked in!`)
+  showToast(isUpdate
+    ? `✏️ Updated to ${p.team} · ${p.conf||1}×`
+    : `🔒 ${p.team} · ${p.conf||1}× locked in!`
+  )
   await refreshDB();renderAll()
 }
 
@@ -851,15 +881,21 @@ function renderAdmin(){
 
 function adminCard(m){
   const locked=isLocked(m),ht=tm(m.home_team),at2=tm(m.away_team)
-  const total=matchVotes(m.id).length
+  const allV=matchVotes(m.id),total=allV.length
   if(m.winner){return`<div class="ac">
     <div class="ach"><div class="act">M${m.id} · ${ht.code} vs ${at2.code} · ${fmtD(m)}</div><span class="chip dn">Done</span></div>
     <div class="db"><span>✅ ${m.winner} won · ${total} picks · Points calculated</span><button class="ub" onclick="askUndo(${m.id})">Undo?</button></div>
   </div>`}
+  const votedNames=USERS.filter(u=>allV.find(v=>v.user_code===u.code)).map(u=>u.name)
+  const notVotedNames=USERS.filter(u=>!allV.find(v=>v.user_code===u.code)).map(u=>u.name)
   return`<div class="ac">
     <div class="ach"><div class="act">M${m.id} · ${m.home_team} vs ${m.away_team}</div>
-    <span class="chip ${locked?'lk':'op'}">${locked?`Locked · ${total} votes`:'Not Locked'}</span></div>
-    <div style="font-size:10px;color:var(--dim2);margin-bottom:9px">${fmtD(m)} · ${fmtT(m)} · ${m.venue}</div>
+    <span class="chip ${locked?'lk':'op'}">${locked?`Locked · ${total} votes`:`Open · ${total} votes`}</span></div>
+    <div style="font-size:10px;color:var(--dim2);margin-bottom:7px">${fmtD(m)} · ${fmtT(m)} · ${m.venue}</div>
+    ${total>0?`<div style="margin-bottom:10px;font-size:11px;line-height:1.8">
+      ${votedNames.length?`<span style="color:var(--grn);font-weight:700">✓ ${votedNames.join(', ')}</span><br>`:''}
+      ${notVotedNames.length?`<span style="color:var(--red);font-weight:700">✗ Not yet: ${notVotedNames.join(', ')}</span>`:''}
+    </div>`:`<div style="margin-bottom:10px;font-size:11px;color:var(--dim)">No votes yet.</div>`}
     <div class="wg">
       <button class="wb" ${!locked?'disabled':''} onclick="enterResult(${m.id},'${esc(m.home_team)}')"
         style="background:linear-gradient(135deg,${ht.dark}55,${ht.dark});color:${ht.light};border:1.5px solid ${ht.acc}44">
@@ -868,6 +904,9 @@ function adminCard(m){
         style="background:linear-gradient(135deg,${at2.dark}55,${at2.dark});color:${at2.light};border:1.5px solid ${at2.acc}44">
         ${at2.code}<span class="wbs">${locked?'👆 Tap = Winner':'Not locked'}</span></button>
     </div>
+    ${total>0?`<button onclick="askResetVotes(${m.id})" style="width:100%;margin-top:9px;padding:9px;border-radius:8px;border:1px solid rgba(232,61,90,.3);background:rgba(232,61,90,.06);color:var(--red);font-family:'Barlow',sans-serif;font-size:12px;font-weight:800;cursor:pointer">
+      🗑 Reset All Votes for This Match
+    </button>`:''}
   </div>`
 }
 
@@ -898,67 +937,4 @@ async function enterResult(mid,winner){
       // Increment using RPC-style — simpler: just read then write
       const u=DB.users.find(x=>x.code===v.user_code)
       await sb.from('users').update({
-        total_points:(u?.total_points||0)+pts,
-        correct:(u?.correct||0)+1
-      }).eq('code',v.user_code)
-      correct++
-    } else {
-      const pts=v.confidence*5
-      await sb.from('votes').update({points_awarded:-pts}).eq('id',v.id)
-      const u=DB.users.find(x=>x.code===v.user_code)
-      await sb.from('users').update({
-        total_points:(u?.total_points||0)-pts,
-        wrong:(u?.wrong||0)+1
-      }).eq('code',v.user_code)
-      wrong++
-    }
-  }
-
-  showToast(`✅ ${winner} won!`)
-  setTimeout(()=>showToast(`🎯 ${correct} correct, ${wrong} wrong${dog?' · 🐶 Underdog bonus!':''}!`),2200)
-  await refreshDB();renderAll()
-}
-
-/* ── UNDO ── */
-function askUndo(mid){
-  undoMid=mid;const m=DB.matches.find(x=>x.id===mid)
-  document.getElementById('modal-msg').textContent=`Remove "${m.winner} won" from M${mid} and reverse all points?`
-  document.getElementById('overlay').classList.add('open')
-}
-function closeModal(){document.getElementById('overlay').classList.remove('open');undoMid=null}
-async function confirmUndo(){
-  if(!undoMid)return
-  const mid=undoMid,m=DB.matches.find(x=>x.id===mid)
-  const allV=matchVotes(mid),winner=m.winner
-  const total=allV.length,wc=allV.filter(v=>v.team===winner).length
-  const dog=total>0&&(wc/total*100)<30
-  for(const v of allV){
-    const u=DB.users.find(x=>x.code===v.user_code)
-    if(v.team===winner){
-      const pts=v.confidence*10+(dog?5:0)
-      await sb.from('users').update({total_points:(u?.total_points||0)-pts,correct:Math.max(0,(u?.correct||0)-1)}).eq('code',v.user_code)
-    } else {
-      const pts=v.confidence*5
-      await sb.from('users').update({total_points:(u?.total_points||0)+pts,wrong:Math.max(0,(u?.wrong||0)-1)}).eq('code',v.user_code)
-    }
-    await sb.from('votes').update({points_awarded:null}).eq('id',v.id)
-  }
-  await sb.from('matches').update({winner:null}).eq('id',mid)
-  closeModal();showToast(`↩️ Result undone for M${mid}`)
-  await refreshDB();renderAll()
-}
-
-/* ── TOAST ── */
-let TT
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(TT);TT=setTimeout(()=>t.classList.remove('show'),3200)}
-
-/* Fix screen show helper */
-function showScreen(id){
-  ;['sLoad','sL','sM'].forEach(s=>document.getElementById(s).classList.replace('on','off'))
-  const map={loading:'sLoad',login:'sL',main:'sM'}
-  const el=document.getElementById(map[id]||'sL')
-  if(el)el.classList.replace('off','on')
-}
-</script>
-</body>
-</html>
+        total_points
