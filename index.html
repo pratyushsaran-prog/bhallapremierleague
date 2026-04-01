@@ -831,9 +831,11 @@ function renderStandings(){
 ══════════════════════════════════════════════════════════ */
 function renderAdmin(){
   const el=document.getElementById('p-admin')
-  const pending=DB.matches.filter(m=>isLocked(m)&&!m.winner)
+  // ALL matches needing a result (locked, no winner) — includes past + today + future once locked
+  const needResult=DB.matches.filter(m=>isLocked(m)&&!m.winner)
   const done=DB.matches.filter(m=>m.winner)
   const openMatches=DB.matches.filter(m=>!isLocked(m))
+  const pending=needResult  // alias for stats bar
 
   let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;margin-top:4px">
     <div class="sh" style="margin:0">ADMIN PANEL</div>
@@ -923,50 +925,70 @@ function adminCard(m){
 }
 
 /* ══════════════════════════════════════════════════════════
-   ENTER RESULT — writes to Supabase, calculates all points
+   ENTER RESULT — calls Supabase SQL function for atomic
+   point calculation. No stale cache issues.
+   Requires: STEP1B-add-scoring-function.sql to be run first.
 ══════════════════════════════════════════════════════════ */
 async function enterResult(mid,winner){
   const m=DB.matches.find(x=>x.id===mid)
-  if(!m||!isLocked(m)){showToast('⏰ Not locked yet!');return}
+  if(!m||!isLocked(m)){showToast('⏰ Match not locked yet!');return}
   if(m.winner){showToast('Already entered. Use Undo to change.');return}
 
-  const allV=matchVotes(mid),total=allV.length
-  const wc=allV.filter(v=>v.team===winner).length
+  showToast('⏳ Calculating points…')
+
+  // Call the SQL function — handles everything atomically in Postgres
+  const {error}=await sb.rpc('calculate_match_points',{
+    p_match_id: mid,
+    p_winner:   winner
+  })
+
+  if(error){
+    // Fallback: if RPC not set up yet, do it client-side
+    console.warn('RPC not available, using fallback:', error.message)
+    await enterResultFallback(mid, winner)
+    return
+  }
+
+  showToast(`✅ ${winner} won! Points updated in Supabase.`)
+  await refreshDB();renderAll()
+}
+
+// Fallback if SQL function hasn't been created yet
+async function enterResultFallback(mid,winner){
+  await refreshDB()  // get fresh data before calculating
+  const freshVotes=DB.votes.filter(v=>v.match_id===mid)
+  const freshUsers=[...DB.users]
+  const total=freshVotes.length
+  const wc=freshVotes.filter(v=>v.team===winner).length
   const dog=total>0&&(wc/total*100)<30
 
-  // Update match winner
   await sb.from('matches').update({winner}).eq('id',mid)
 
-  // Calculate and update points for each voter
   let correct=0,wrong=0
-  for(const v of allV){
+  for(const v of freshVotes){
+    const u=freshUsers.find(x=>x.code===v.user_code)
     if(v.team===winner){
       const pts=v.confidence*10+(dog?5:0)
       await sb.from('votes').update({points_awarded:pts}).eq('id',v.id)
       await sb.from('users').update({
-        total_points: supabase.rpc ? undefined : 0  // handled below
-      }).eq('code',v.user_code)
-      // Increment using RPC-style — simpler: just read then write
-      const u=DB.users.find(x=>x.code===v.user_code)
-      await sb.from('users').update({
         total_points:(u?.total_points||0)+pts,
         correct:(u?.correct||0)+1
       }).eq('code',v.user_code)
+      // Update local cache so next iteration has correct value
+      if(u){u.total_points=(u.total_points||0)+pts;u.correct=(u.correct||0)+1}
       correct++
     } else {
       const pts=v.confidence*5
       await sb.from('votes').update({points_awarded:-pts}).eq('id',v.id)
-      const u=DB.users.find(x=>x.code===v.user_code)
       await sb.from('users').update({
         total_points:(u?.total_points||0)-pts,
         wrong:(u?.wrong||0)+1
       }).eq('code',v.user_code)
+      if(u){u.total_points=(u.total_points||0)-pts;u.wrong=(u.wrong||0)+1}
       wrong++
     }
   }
-
-  showToast(`✅ ${winner} won!`)
-  setTimeout(()=>showToast(`🎯 ${correct} correct, ${wrong} wrong${dog?' · 🐶 Underdog bonus!':''}!`),2200)
+  showToast(`✅ ${winner} won! ${correct} correct, ${wrong} wrong${dog?' · 🐶 Underdog!':''}`)
   await refreshDB();renderAll()
 }
 
@@ -979,23 +1001,33 @@ function askUndo(mid){
 function closeModal(){document.getElementById('overlay').classList.remove('open');undoMid=null}
 async function confirmUndo(){
   if(!undoMid)return
-  const mid=undoMid,m=DB.matches.find(x=>x.id===mid)
-  const allV=matchVotes(mid),winner=m.winner
-  const total=allV.length,wc=allV.filter(v=>v.team===winner).length
-  const dog=total>0&&(wc/total*100)<30
-  for(const v of allV){
-    const u=DB.users.find(x=>x.code===v.user_code)
-    if(v.team===winner){
-      const pts=v.confidence*10+(dog?5:0)
-      await sb.from('users').update({total_points:(u?.total_points||0)-pts,correct:Math.max(0,(u?.correct||0)-1)}).eq('code',v.user_code)
-    } else {
-      const pts=v.confidence*5
-      await sb.from('users').update({total_points:(u?.total_points||0)+pts,wrong:Math.max(0,(u?.wrong||0)-1)}).eq('code',v.user_code)
+  const mid=undoMid
+  showToast('⏳ Reversing points…')
+
+  const {error}=await sb.rpc('undo_match_points',{p_match_id:mid})
+
+  if(error){
+    // Fallback client-side undo
+    console.warn('RPC undo not available, using fallback:', error.message)
+    const m=DB.matches.find(x=>x.id===mid)
+    const allV=matchVotes(mid),winner=m.winner
+    const total=allV.length,wc=allV.filter(v=>v.team===winner).length
+    const dog=total>0&&(wc/total*100)<30
+    for(const v of allV){
+      const u=DB.users.find(x=>x.code===v.user_code)
+      if(v.team===winner){
+        const pts=v.confidence*10+(dog?5:0)
+        await sb.from('users').update({total_points:(u?.total_points||0)-pts,correct:Math.max(0,(u?.correct||0)-1)}).eq('code',v.user_code)
+      } else {
+        const pts=v.confidence*5
+        await sb.from('users').update({total_points:(u?.total_points||0)+pts,wrong:Math.max(0,(u?.wrong||0)-1)}).eq('code',v.user_code)
+      }
+      await sb.from('votes').update({points_awarded:null}).eq('id',v.id)
     }
-    await sb.from('votes').update({points_awarded:null}).eq('id',v.id)
+    await sb.from('matches').update({winner:null}).eq('id',mid)
   }
-  await sb.from('matches').update({winner:null}).eq('id',mid)
-  closeModal();showToast(`↩️ Result undone for M${mid}`)
+
+  closeModal();showToast(`↩️ Result undone for M${mid} — points reversed`)
   await refreshDB();renderAll()
 }
 
