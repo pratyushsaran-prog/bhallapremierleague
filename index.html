@@ -698,61 +698,127 @@ async function submitVote(mid){
 ══════════════════════════════════════════════════════════ */
 function renderPicks(){
   const el=document.getElementById('p-picks')
-  const revealed=DB.matches.filter(m=>isLocked(m))
-  const openCount=DB.matches.filter(m=>!isLocked(m)).length
-  let h=`<div class="sh">ALL PICKS — AFTER LOCK</div>
-  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:10px 13px;margin-bottom:12px;font-size:11px;color:var(--dim2);line-height:1.6">
-    👀 <strong style="color:var(--txt)">Everyone's picks shown here after 7:30 PM.</strong><br>
-    ${openCount>0?`${openCount} matches still open — picks hidden until lock time.`:'All matches locked.'}
-  </div>`
-  if(!revealed.length){
-    h+=`<div style="text-align:center;padding:50px 20px;color:var(--dim)">
-      <div style="font-size:36px;margin-bottom:12px">🕐</div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:8px">PICKS HIDDEN</div>
-      <div style="font-size:13px;line-height:1.6">Appears here after 7:30 PM IST</div>
+  const td=todayStr()
+
+  // Split matches into 3 buckets
+  const todayOpen   = DB.matches.filter(m=>m.match_date===td&&!isLocked(m)&&!m.winner)
+  const lockedOrDone= DB.matches.filter(m=>isLocked(m)).reverse()  // most recent first
+  const future      = DB.matches.filter(m=>m.match_date>td&&!isLocked(m))
+
+  let h=`<div class="sh">ALL PICKS</div>`
+
+  /* ── TODAY'S OPEN MATCHES — show who voted, hide which team ── */
+  if(todayOpen.length){
+    h+=`<div class="sh" style="color:var(--acc)">🟡 TODAY — VOTING OPEN</div>`
+    h+=`<div style="background:rgba(242,184,48,.06);border:1px solid rgba(242,184,48,.18);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:var(--dim2)">
+      Votes are live. <strong style="color:var(--acc)">Team picks hidden until 7:30 PM.</strong> Shows who has voted only.
     </div>`
-    el.innerHTML=h;return
+    todayOpen.forEach(m=>{
+      const allV=matchVotes(m.id)
+      const ht=tm(m.home_team),at2=tm(m.away_team)
+      const votedCodes=allV.map(v=>v.user_code)
+      const votedCount=votedCodes.length
+      const pct=Math.round(votedCount/USERS.length*100)
+      h+=`<div class="mc" style="margin-bottom:10px">
+        <div class="mh">
+          <div>
+            <div style="font-size:12px;font-weight:800">M${m.id} · ${ht.code} vs ${at2.code}</div>
+            <div style="font-size:9px;color:var(--dim2);margin-top:1px">${fmtD(m)} · ${fmtT(m)} · ${m.venue}</div>
+          </div>
+          <span style="font-size:11px;font-weight:800;color:${votedCount===USERS.length?'var(--grn)':'var(--acc)'}">${votedCount}/${USERS.length} voted</span>
+        </div>
+        <div style="padding:10px 13px 12px">
+          <div style="height:4px;background:var(--s3);border-radius:2px;margin-bottom:11px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:${votedCount===USERS.length?'var(--grn)':'var(--acc)'};border-radius:2px;transition:width .6s"></div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">`
+      USERS.forEach(u=>{
+        const voted=votedCodes.includes(u.code)
+        h+=`<div style="display:flex;align-items:center;gap:5px;padding:5px 10px 5px 6px;border-radius:20px;
+          background:${voted?'rgba(29,185,84,.1)':'rgba(94,95,122,.1)'};
+          border:1px solid ${voted?'rgba(29,185,84,.3)':'var(--b1)'};
+          font-size:12px;font-weight:700;color:${voted?'var(--grn)':'var(--dim)'}">
+          <div style="width:18px;height:18px;border-radius:50%;background:${u.grad};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;flex-shrink:0">${u.name.charAt(0)}</div>
+          ${u.name} <span style="font-size:13px">${voted?'✓':'✗'}</span>
+        </div>`
+      })
+      h+=`</div></div></div>`
+    })
   }
-  ;[...revealed].reverse().forEach(m=>{
-    const allV=matchVotes(m.id),ht=tm(m.home_team),at2=tm(m.away_team),st=mstat(m)
-    h+=`<div class="mc" style="margin-bottom:12px">
-      <div class="mh">
-        <div><div style="font-size:12px;font-weight:800">M${m.id} · ${ht.code} vs ${at2.code}</div>
-        <div style="font-size:9px;color:var(--dim2);margin-top:1px">${fmtD(m)} · ${m.venue}${m.winner?` · <span style="color:var(--grn)">${tm(m.winner).code} Won</span>`:''}</div></div>
-        <span class="chip ${st}">${st==='dn'&&m.winner?`${tm(m.winner).code} Won`:st==='lk'?'🔒 Locked':'Done'}</span>
-      </div>
-      <div style="padding:8px 13px 12px">`
-    // Name headers
-    h+=`<div style="display:flex;margin-bottom:6px"><div style="width:38px"></div>`
-    USERS.forEach(u=>{h+=`<div style="flex:1;text-align:center;font-size:8px;font-weight:800;color:var(--dim2);text-transform:uppercase">${u.name.slice(0,5)}</div>`})
-    h+=`</div>`
-    // Home row
-    h+=`<div style="display:flex;align-items:center;margin-bottom:4px"><div style="width:38px;font-size:9px;font-weight:800;color:${ht.light}">${ht.code}</div>`
-    USERS.forEach(u=>{
-      const v=allV.find(x=>x.user_code===u.code&&x.team===m.home_team)
-      const win=v&&m.winner===m.home_team,loss=v&&m.winner&&m.winner!==m.home_team
-      const dog=win&&isDog(m.id,m.home_team)
-      const pts=win?v.confidence*10+(dog?5:0):loss?-(v.confidence*5):null
-      h+=`<div style="flex:1;text-align:center">`
-      if(v)h+=`<div style="padding:3px 1px;border-radius:5px;font-size:9px;font-weight:800;background:${win?'rgba(29,185,84,.14)':loss?'rgba(232,61,90,.08)':'var(--s2)'};color:${win?'var(--grn)':loss?'var(--red)':'var(--acc)'}">${v.confidence}×${pts!==null?`<br><span style="font-size:8px">${pts>0?'+':''}${pts}</span>`:''}</div>`
-      else h+=`<div style="font-size:10px;color:var(--b2);text-align:center">—</div>`
+
+  /* ── LOCKED / DONE MATCHES — show full team + points grid ── */
+  if(lockedOrDone.length){
+    h+=`<div class="sh" style="color:var(--txt)">🔒 LOCKED — FULL PICKS</div>`
+    lockedOrDone.forEach(m=>{
+      const allV=matchVotes(m.id),ht=tm(m.home_team),at2=tm(m.away_team),st=mstat(m)
+      h+=`<div class="mc" style="margin-bottom:10px">
+        <div class="mh">
+          <div>
+            <div style="font-size:12px;font-weight:800">M${m.id} · ${ht.code} vs ${at2.code}</div>
+            <div style="font-size:9px;color:var(--dim2);margin-top:1px">${fmtD(m)} · ${m.venue}${m.winner?` · <span style="color:var(--grn)">${tm(m.winner).code} Won</span>`:''}</div>
+          </div>
+          <span class="chip ${st}">${st==='dn'&&m.winner?`${tm(m.winner).code} Won`:'🔒 Locked'}</span>
+        </div>
+        <div style="padding:8px 13px 12px">`
+      // Name headers
+      h+=`<div style="display:flex;margin-bottom:5px"><div style="width:36px"></div>`
+      USERS.forEach(u=>{h+=`<div style="flex:1;text-align:center;font-size:8px;font-weight:800;color:var(--dim2);text-transform:uppercase;line-height:1.2">${u.name.slice(0,4)}</div>`})
       h+=`</div>`
-    })
-    h+=`</div>`
-    // Away row
-    h+=`<div style="display:flex;align-items:center"><div style="width:38px;font-size:9px;font-weight:800;color:${at2.light}">${at2.code}</div>`
-    USERS.forEach(u=>{
-      const v=allV.find(x=>x.user_code===u.code&&x.team===m.away_team)
-      const win=v&&m.winner===m.away_team,loss=v&&m.winner&&m.winner!==m.away_team
-      const dog=win&&isDog(m.id,m.away_team)
-      const pts=win?v.confidence*10+(dog?5:0):loss?-(v.confidence*5):null
-      h+=`<div style="flex:1;text-align:center">`
-      if(v)h+=`<div style="padding:3px 1px;border-radius:5px;font-size:9px;font-weight:800;background:${win?'rgba(29,185,84,.14)':loss?'rgba(232,61,90,.08)':'var(--s2)'};color:${win?'var(--grn)':loss?'var(--red)':'var(--acc)'}">${v.confidence}×${pts!==null?`<br><span style="font-size:8px">${pts>0?'+':''}${pts}</span>`:''}</div>`
-      else h+=`<div style="font-size:10px;color:var(--b2);text-align:center">—</div>`
+      // Home row
+      h+=`<div style="display:flex;align-items:center;margin-bottom:4px"><div style="width:36px;font-size:9px;font-weight:800;color:${ht.light}">${ht.code}</div>`
+      USERS.forEach(u=>{
+        const v=allV.find(x=>x.user_code===u.code&&x.team===m.home_team)
+        const win=v&&m.winner===m.home_team,loss=v&&m.winner&&m.winner!==m.home_team
+        const dog=win&&isDog(m.id,m.home_team)
+        const pts=win?v.confidence*10+(dog?5:0):loss?-(v.confidence*5):null
+        h+=`<div style="flex:1;text-align:center">`
+        if(v)h+=`<div style="padding:3px 1px;border-radius:5px;font-size:9px;font-weight:800;background:${win?'rgba(29,185,84,.14)':loss?'rgba(232,61,90,.08)':'var(--s2)'};color:${win?'var(--grn)':loss?'var(--red)':'var(--acc)'}">${v.confidence}×${pts!==null?`<br><span style="font-size:8px">${pts>0?'+':''}${pts}</span>`:''}</div>`
+        else h+=`<div style="font-size:10px;color:var(--b2);text-align:center">—</div>`
+        h+=`</div>`
+      })
       h+=`</div>`
+      // Away row
+      h+=`<div style="display:flex;align-items:center"><div style="width:36px;font-size:9px;font-weight:800;color:${at2.light}">${at2.code}</div>`
+      USERS.forEach(u=>{
+        const v=allV.find(x=>x.user_code===u.code&&x.team===m.away_team)
+        const win=v&&m.winner===m.away_team,loss=v&&m.winner&&m.winner!==m.away_team
+        const dog=win&&isDog(m.id,m.away_team)
+        const pts=win?v.confidence*10+(dog?5:0):loss?-(v.confidence*5):null
+        h+=`<div style="flex:1;text-align:center">`
+        if(v)h+=`<div style="padding:3px 1px;border-radius:5px;font-size:9px;font-weight:800;background:${win?'rgba(29,185,84,.14)':loss?'rgba(232,61,90,.08)':'var(--s2)'};color:${win?'var(--grn)':loss?'var(--red)':'var(--acc)'}">${v.confidence}×${pts!==null?`<br><span style="font-size:8px">${pts>0?'+':''}${pts}</span>`:''}</div>`
+        else h+=`<div style="font-size:10px;color:var(--b2);text-align:center">—</div>`
+        h+=`</div>`
+      })
+      h+=`</div></div></div>`
     })
-    h+=`</div></div></div>`
-  })
+  }
+
+  /* ── FUTURE MATCHES — just vote counts, no picks shown ── */
+  if(future.length){
+    h+=`<div class="sh" style="color:var(--blue)">📅 UPCOMING MATCHES</div>`
+    future.slice(0,10).forEach(m=>{
+      const allV=matchVotes(m.id),ht=tm(m.home_team),at2=tm(m.away_team)
+      h+=`<div class="mc" style="margin-bottom:8px">
+        <div class="mh">
+          <div>
+            <div style="font-size:12px;font-weight:800">M${m.id} · ${ht.code} vs ${at2.code}</div>
+            <div style="font-size:9px;color:var(--dim2);margin-top:1px">${fmtD(m)} · ${fmtT(m)} · ${m.venue}</div>
+          </div>
+          <span style="font-size:11px;font-weight:700;color:var(--blue)">${allV.length}/${USERS.length} voted</span>
+        </div>
+        <div style="padding:8px 13px;font-size:10px;color:var(--dim);font-style:italic">Team picks revealed after match locks at ${fmtT(m)}</div>
+      </div>`
+    })
+    if(future.length>10)h+=`<div style="text-align:center;padding:6px;font-size:11px;color:var(--dim)">+${future.length-10} more upcoming matches</div>`
+  }
+
+  if(!todayOpen.length&&!lockedOrDone.length&&!future.length){
+    h+=`<div style="text-align:center;padding:50px 20px;color:var(--dim)">
+      <div style="font-size:36px;margin-bottom:12px">🏏</div>
+      <div style="font-size:13px">No matches yet</div>
+    </div>`
+  }
+
   el.innerHTML=h
 }
 
