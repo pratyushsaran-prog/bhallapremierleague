@@ -317,7 +317,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
    ⚙️  CONFIGURATION — Replace with your Supabase values
    Get from: supabase.com → your project → Settings → API
 ══════════════════════════════════════════════════════════ */
-const SUPABASE_URL  = 'https://kpfnoppmfvkxdssaabef.supabase.co'
+const SUPABASE_URL  = 'https://kpfnoppmfvkxdssaabef.supabase.co'  // ← paste your URL
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwZm5vcHBtZnZreGRzc2FhYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODEyODgsImV4cCI6MjA5MDQ1NzI4OH0.Prjaq85U5EDTKdRrn4tqiO0p-7ktlE1d5yjBfXlLVp4'
 
 /* ══════════════════════════════════════════════════════════
@@ -683,22 +683,34 @@ async function submitVote(mid){
   if(!m||isLocked(m)){showToast('⏰ Voting closed at 7:30 PM!');setSaveStatus(mid,'Locked','var(--red)');return}
   const existing=myVote(mid)
   const isUpdate=!!existing
-  const {error}=await sb.from('votes').upsert(
-    {match_id:mid, user_code:CU.code, team:p.team, confidence:p.conf||1},
-    {onConflict:'match_id,user_code'}
-  )
-  if(error){
-    showToast('❌ Failed to save. Try again.')
-    setSaveStatus(mid,'Save failed ✗','var(--red)')
-    console.error(error);return
+
+  // Delete existing vote first (works around RLS upsert issues), then insert fresh
+  if(existing){
+    const {error:delErr}=await sb.from('votes').delete()
+      .eq('match_id',mid).eq('user_code',CU.code)
+    if(delErr){
+      showToast('❌ Failed to update. Try again.')
+      setSaveStatus(mid,'Failed ✗','var(--red)')
+      console.error(delErr);return
+    }
   }
-  // Update local DB cache instantly (no full re-render flicker)
-  const existing2=DB.votes.find(v=>v.match_id===mid&&v.user_code===CU.code)
-  if(existing2){existing2.team=p.team;existing2.confidence=p.conf||1}
+
+  const {error:insErr}=await sb.from('votes').insert(
+    {match_id:mid, user_code:CU.code, team:p.team, confidence:p.conf||1}
+  )
+  if(insErr){
+    showToast('❌ Failed to save. Try again.')
+    setSaveStatus(mid,'Failed ✗','var(--red)')
+    console.error(insErr);return
+  }
+
+  // Update local cache instantly
+  const cached=DB.votes.find(v=>v.match_id===mid&&v.user_code===CU.code)
+  if(cached){cached.team=p.team;cached.confidence=p.conf||1}
   else DB.votes.push({match_id:mid,user_code:CU.code,team:p.team,confidence:p.conf||1,id:Date.now()})
+
   setSaveStatus(mid,'✓ Saved','var(--grn)')
   showToast(isUpdate?`✏️ Updated to ${tm(p.team).code} · ${p.conf||1}×`:`✓ ${tm(p.team).code} · ${p.conf||1}× saved!`)
-  // Refresh in background so voter counts stay accurate
   refreshDB().then(()=>renderAll())
 }
 
@@ -744,12 +756,21 @@ function renderPicks(){
           <div style="display:flex;flex-wrap:wrap;gap:6px">`
       USERS.forEach(u=>{
         const voted=votedCodes.includes(u.code)
+        const isMe=u.code===CU.code
+        const uVote=allV.find(v=>v.user_code===u.code)
+        // Show own pick always; show others' only after lock
+        const showTeam=isMe&&uVote
+        const vt=showTeam?tm(uVote.team):null
         h+=`<div style="display:flex;align-items:center;gap:5px;padding:5px 10px 5px 6px;border-radius:20px;
           background:${voted?'rgba(29,185,84,.1)':'rgba(94,95,122,.1)'};
-          border:1px solid ${voted?'rgba(29,185,84,.3)':'var(--b1)'};
+          border:1px solid ${voted?(isMe?'rgba(242,184,48,.5)':'rgba(29,185,84,.3)'):'var(--b1)'};
           font-size:12px;font-weight:700;color:${voted?'var(--grn)':'var(--dim)'}">
           <div style="width:18px;height:18px;border-radius:50%;background:${u.grad};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;flex-shrink:0">${u.name.charAt(0)}</div>
-          ${u.name} <span style="font-size:13px">${voted?'✓':'✗'}</span>
+          ${u.name}
+          ${showTeam
+            ? `<span style="font-size:10px;font-weight:800;color:${vt.light};background:${vt.dark}55;padding:1px 5px;border-radius:10px;margin-left:2px">${vt.code}·${uVote.confidence}×</span>`
+            : `<span style="font-size:13px;margin-left:2px">${voted?'✓':'✗'}</span>`
+          }
         </div>`
       })
       h+=`</div></div></div>`
