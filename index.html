@@ -581,7 +581,11 @@ function buildCard(m){
     h+=`<div class="pz">
       <div style="display:flex;justify-content:space-between;align-items:center;padding-top:9px;margin-bottom:7px">
         <span class="pzl" style="padding-top:0;margin-bottom:0">Your Prediction</span>
-        ${isUpdate?`<span style="font-size:9px;color:var(--grn);font-weight:700;background:rgba(29,185,84,.08);padding:2px 8px;border-radius:20px">✓ Saved · change anytime</span>`:''}
+        <span id="sv-${m.id}" style="font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;
+          background:${isUpdate?'rgba(29,185,84,.08)':'transparent'};
+          color:${isUpdate?'var(--grn)':'var(--dim)'}">
+          ${isUpdate?'✓ Saved':'Tap to pick'}
+        </span>
       </div>
       <div class="pg">
         <button class="pb ${selHome?'sel':''}" id="pb-${m.id}-h" onclick="pickTeam(${m.id},'${esc(m.home_team)}',this)">${ht.code}<br><small style="font-size:9px;font-weight:600;opacity:.75">${m.home_team}</small></button>
@@ -595,10 +599,6 @@ function buildCard(m){
           <button class="cb ${curConf===3?'sel':''}" onclick="pickConf(${m.id},3,this)">3×</button>
         </div>
       </div>
-      <button class="lkb" id="lk${m.id}" onclick="submitVote(${m.id})" ${curTeam?'':'disabled'}
-        style="${isUpdate?'background:linear-gradient(135deg,#4285f4,#6a3de8)':''}">
-        ${btnLabel}
-      </button>
     </div>`
   } else {
     const allV=matchVotes(m.id),total=allV.length
@@ -651,46 +651,55 @@ function pickTeam(mid,team,btn){
   if(!PP[mid])PP[mid]={team:null,conf:1}
   PP[mid].team=team
   btn.closest('.pg').querySelectorAll('.pb').forEach(b=>b.classList.remove('sel'))
-  btn.classList.add('sel');refreshLk(mid)
+  btn.classList.add('sel')
+  // Auto-save whenever team is selected (confidence already has a default of 1)
+  autoSave(mid)
 }
 function pickConf(mid,conf,btn){
   if(!PP[mid])PP[mid]={team:null,conf:1}
   PP[mid].conf=conf
   btn.closest('.cg').querySelectorAll('.cb').forEach(b=>b.classList.remove('sel'))
-  btn.classList.add('sel');refreshLk(mid)
+  btn.classList.add('sel')
+  // Auto-save on confidence change only if team already selected
+  if(PP[mid].team) autoSave(mid)
 }
-function refreshLk(mid){
-  const btn=document.getElementById('lk'+mid);if(!btn)return
-  const p=PP[mid]
-  const existing=myVote(mid)
-  if(p&&p.team){
-    btn.disabled=false
-    const isUpdate=!!existing
-    btn.textContent=isUpdate?`Update Pick: ${tm(p.team).code} · ${p.conf||1}×`:`Lock In: ${tm(p.team).code} · ${p.conf||1}×`
-    btn.style.background=isUpdate?'linear-gradient(135deg,#4285f4,#6a3de8)':'linear-gradient(135deg,var(--acc),var(--red))'
-  } else {
-    btn.disabled=true
-    btn.textContent='Select a team first'
-    btn.style.background='linear-gradient(135deg,var(--acc),var(--red))'
-  }
+function setSaveStatus(mid,msg,color){
+  const el=document.getElementById('sv-'+mid)
+  if(!el)return
+  el.textContent=msg
+  el.style.color=color
+  el.style.background=color==='var(--grn)'?'rgba(29,185,84,.08)':color==='var(--acc)'?'rgba(242,184,48,.1)':'transparent'
+}
+// Debounce map so rapid taps don't fire multiple requests
+const SAVE_T={}
+function autoSave(mid){
+  clearTimeout(SAVE_T[mid])
+  setSaveStatus(mid,'Saving…','var(--acc)')
+  SAVE_T[mid]=setTimeout(()=>submitVote(mid),400)
 }
 async function submitVote(mid){
   const p=PP[mid];if(!p||!p.team)return
   const m=DB.matches.find(x=>x.id===mid)
-  if(!m||isLocked(m)){showToast('⏰ Voting closed at 7:30 PM!');return}
+  if(!m||isLocked(m)){showToast('⏰ Voting closed at 7:30 PM!');setSaveStatus(mid,'Locked','var(--red)');return}
   const existing=myVote(mid)
   const isUpdate=!!existing
-  // upsert — inserts if new, updates if exists (match_id + user_code is unique key)
   const {error}=await sb.from('votes').upsert(
     {match_id:mid, user_code:CU.code, team:p.team, confidence:p.conf||1},
     {onConflict:'match_id,user_code'}
   )
-  if(error){showToast('❌ Failed to save. Try again.');console.error(error);return}
-  showToast(isUpdate
-    ? `✏️ Updated to ${p.team} · ${p.conf||1}×`
-    : `🔒 ${p.team} · ${p.conf||1}× locked in!`
-  )
-  await refreshDB();renderAll()
+  if(error){
+    showToast('❌ Failed to save. Try again.')
+    setSaveStatus(mid,'Save failed ✗','var(--red)')
+    console.error(error);return
+  }
+  // Update local DB cache instantly (no full re-render flicker)
+  const existing2=DB.votes.find(v=>v.match_id===mid&&v.user_code===CU.code)
+  if(existing2){existing2.team=p.team;existing2.confidence=p.conf||1}
+  else DB.votes.push({match_id:mid,user_code:CU.code,team:p.team,confidence:p.conf||1,id:Date.now()})
+  setSaveStatus(mid,'✓ Saved','var(--grn)')
+  showToast(isUpdate?`✏️ Updated to ${tm(p.team).code} · ${p.conf||1}×`:`✓ ${tm(p.team).code} · ${p.conf||1}× saved!`)
+  // Refresh in background so voter counts stay accurate
+  refreshDB().then(()=>renderAll())
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -700,18 +709,17 @@ function renderPicks(){
   const el=document.getElementById('p-picks')
   const td=todayStr()
 
-  // Split matches into 3 buckets
-  const todayOpen   = DB.matches.filter(m=>m.match_date===td&&!isLocked(m)&&!m.winner)
-  const lockedOrDone= DB.matches.filter(m=>isLocked(m)).reverse()  // most recent first
-  const future      = DB.matches.filter(m=>m.match_date>td&&!isLocked(m))
+  // Split matches: open (all not-yet-locked), locked/done
+  const todayOpen   = DB.matches.filter(m=>!isLocked(m)&&!m.winner)  // ALL open matches, not just today
+  const lockedOrDone= DB.matches.filter(m=>isLocked(m)).reverse()    // most recent first
 
   let h=`<div class="sh">ALL PICKS</div>`
 
   /* ── TODAY'S OPEN MATCHES — show who voted, hide which team ── */
   if(todayOpen.length){
-    h+=`<div class="sh" style="color:var(--acc)">🟡 TODAY — VOTING OPEN</div>`
+    h+=`<div class="sh" style="color:var(--acc)">🟡 VOTING OPEN — ${todayOpen.length} MATCHES</div>`
     h+=`<div style="background:rgba(242,184,48,.06);border:1px solid rgba(242,184,48,.18);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:11px;color:var(--dim2)">
-      Votes are live. <strong style="color:var(--acc)">Team picks hidden until 7:30 PM.</strong> Shows who has voted only.
+      Team picks are hidden until 7:30 PM. Shows who has already voted for each match.
     </div>`
     todayOpen.forEach(m=>{
       const allV=matchVotes(m.id)
