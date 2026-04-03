@@ -710,7 +710,9 @@ function renderPicks(){
   const td=todayStr()
 
   // Split matches: open (all not-yet-locked), locked/done
-  const todayOpen   = DB.matches.filter(m=>!isLocked(m)&&!m.winner)  // ALL open matches, not just today
+  const allOpen     = DB.matches.filter(m=>!isLocked(m)&&!m.winner)  // ALL open matches
+  const todayOpen   = allOpen  // alias used for voter tracker section
+  const future      = allOpen  // alias used for upcoming section (same data)
   const lockedOrDone= DB.matches.filter(m=>isLocked(m)).reverse()    // most recent first
 
   let h=`<div class="sh">ALL PICKS</div>`
