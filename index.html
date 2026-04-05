@@ -900,12 +900,32 @@ function renderStandings(){
     const ux=USERS.find(x=>x.code===u.code)||{grad:'linear-gradient(135deg,#555,#888)',name:u.name}
     const me=u.code===CU.code,first=i===0
     const voted=DB.votes.filter(v=>v.user_code===u.code).length
+
+    // Last 10 settled picks, most recent first
+    const settled=DB.matches
+      .filter(m=>m.winner)
+      .map(m=>({m, v:DB.votes.find(x=>x.match_id===m.id&&x.user_code===u.code)}))
+      .filter(x=>x.v)
+      .sort((a,b)=>b.m.id-a.m.id)
+      .slice(0,10)
+    const dots=settled.map(({m,v})=>{
+      const win=v.team===m.winner
+      return `<span title="${win?'✓':'✗'} M${m.id}" style="
+        display:inline-block;width:9px;height:9px;border-radius:50%;flex-shrink:0;
+        background:${win?'var(--grn)':'var(--red)'};
+        opacity:${win?'1':'.7'}"
+      ></span>`
+    }).join('')
+
     h+=`<div class="lr ${first?'gd':''} ${me&&!first?'me':''}">
       <div class="lrk">${first?'👑':i+1}</div>
       <div class="lav" style="background:${ux.grad}">${u.name.charAt(0)}</div>
       <div class="li">
         <div class="ln">${u.name}${me?'<span class="mtg">YOU</span>':''}</div>
-        <div class="ls">✅ ${u.correct||0} · ❌ ${u.wrong||0} · 🗳 ${voted}/${DB.matches.length}</div>
+        <div class="ls" style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:4px">
+          <span>✅ ${u.correct||0} · ❌ ${u.wrong||0}</span>
+          ${dots?`<span style="display:flex;gap:3px;align-items:center">${dots}</span>`:''}
+        </div>
       </div>
       <div class="lpw"><div class="lpt">${u.total_points||0}</div><span class="lpl">pts</span></div>
     </div>`
