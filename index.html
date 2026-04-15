@@ -94,6 +94,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .chip.op{background:rgba(29,185,84,.11);color:var(--grn)}
 .chip.lk{background:rgba(94,95,122,.15);color:var(--dim2)}
 .chip.dn{background:rgba(242,184,48,.11);color:var(--acc)}
+.chip.ab{background:rgba(94,95,122,.18);color:#9293aa}
 .chip.ft{background:rgba(66,133,244,.1);color:var(--blue)}
 .mt{display:flex;align-items:center;padding:11px 12px 9px;gap:7px}
 .mteam{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
@@ -408,7 +409,7 @@ function lockUTC(m){
 function isLocked(m){return m.is_past||Date.now()>=lockUTC(m).getTime()}
 function mstat(m){
   if(m.is_past)return m.winner?'dn':'lk'
-  if(m.winner)return'dn'
+  if(m.winner)return m.winner==='ABANDONED'?'ab':'dn'
   if(isLocked(m))return'lk'
   return'op'
 }
@@ -548,7 +549,9 @@ function buildCard(m){
   const hW=m.winner===m.home_team,aW=m.winner===m.away_team
   const isFuture=!m.is_past&&!locked&&m.match_date>todayStr()
   const chipCls=st==='op'&&isFuture?'ft':st
-  const chipLbl={op:isFuture?`Open · Locks ${fmtD(m)}`:'Open · Vote Now',lk:'🔒 Locked',dn:m.winner?`${tm(m.winner).code} Won`:'Result In'}
+  const isAbandoned=m.winner==='ABANDONED'
+  const chipLbl={op:isFuture?`Open · Locks ${fmtD(m)}`:'Open · Vote Now',lk:'🔒 Locked',dn:isAbandoned?'🌧 Abandoned':m.winner?`${tm(m.winner).code} Won`:'Result In',ab:'🌧 Abandoned'}
+  if(isAbandoned){hW=false;aW=false}  // no winner highlight for abandoned
 
   let h=`<div class="mc">
     <div class="mh">
@@ -744,9 +747,9 @@ function renderPicks(){
         <div class="mh">
           <div>
             <div style="font-size:12px;font-weight:800">M${m.id} · ${ht.code} vs ${at2.code}</div>
-            <div style="font-size:9px;color:var(--dim2);margin-top:1px">${fmtD(m)} · ${m.venue}${m.winner?` · <span style="color:var(--grn);font-weight:800">${tm(m.winner).code} Won ✓</span>`:''}</div>
+            <div style="font-size:9px;color:var(--dim2);margin-top:1px">${fmtD(m)} · ${m.venue}${m.winner==='ABANDONED'?' · <span style="color:var(--dim2);font-weight:800">🌧 Abandoned</span>':m.winner?` · <span style="color:var(--grn);font-weight:800">${tm(m.winner).code} Won ✓</span>`:''}</div>
           </div>
-          <span class="chip ${st}">${st==='dn'&&m.winner?`${tm(m.winner).code} Won`:st==='lk'?'🔒 Locked':'Done'}</span>
+          <span class="chip ${st}">${st==='ab'?'🌧 Abandoned':st==='dn'&&m.winner?`${tm(m.winner).code} Won`:st==='lk'?'🔒 Locked':'Done'}</span>
         </div>`
 
       // Distribution bars
@@ -776,24 +779,27 @@ function renderPicks(){
       USERS.forEach(u=>{
         const v=allV.find(x=>x.user_code===u.code)
         const vt=v?tm(v.team):null
-        const win=v&&m.winner&&v.team===m.winner
-        const loss=v&&m.winner&&v.team!==m.winner
+        const abandoned=m.winner==='ABANDONED'
+        const win=!abandoned&&v&&m.winner&&v.team===m.winner
+        const loss=!abandoned&&v&&m.winner&&v.team!==m.winner
         const dog=win&&isDog(m.id,v.team)
         const pts=win?v.confidence*10+(dog?5:0):loss?-(v.confidence*5):null
         const isMe=u.code===CU.code
 
         h+=`<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:10px;
-          background:${win?'rgba(29,185,84,.07)':loss?'rgba(232,61,90,.05)':'var(--s2)'};
-          border:1px solid ${win?'rgba(29,185,84,.25)':loss?'rgba(232,61,90,.15)':isMe?'rgba(242,184,48,.3)':'var(--b1)'};
-          opacity:${loss?'.75':'1'}">
+          background:${abandoned?'var(--s2)':win?'rgba(29,185,84,.07)':loss?'rgba(232,61,90,.05)':'var(--s2)'};
+          border:1px solid ${abandoned?'var(--b1)':win?'rgba(29,185,84,.25)':loss?'rgba(232,61,90,.15)':isMe?'rgba(242,184,48,.3)':'var(--b1)'};
+          opacity:${abandoned?'.5':loss?'.75':'1'}">
           <div style="width:22px;height:22px;border-radius:50%;background:${u.grad};display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;flex-shrink:0">${u.name.charAt(0)}</div>
           <span style="font-size:12px;font-weight:700;flex:1;color:${isMe?'var(--acc)':'var(--txt)'}">${u.name}${isMe?' (you)':''}</span>
           ${v
             ? `<span style="font-size:11px;font-weight:800;padding:2px 8px;border-radius:20px;background:${vt.dark}55;color:${vt.light}">${vt.code}</span>
                <span style="font-size:10px;font-weight:800;color:var(--blue)">${v.confidence}×</span>
-               ${pts!==null
-                 ? `<span style="font-size:12px;font-weight:900;color:${pts>=0?'var(--grn)':'var(--red)'};min-width:36px;text-align:right">${pts>0?'+':''}${pts}${dog?'🐶':''}</span>`
-                 : `<span style="font-size:10px;color:var(--dim);min-width:36px;text-align:right">pending</span>`
+               ${abandoned
+                 ? `<span style="font-size:10px;color:var(--dim);min-width:36px;text-align:right">0 pts</span>`
+                 : pts!==null
+                   ? `<span style="font-size:12px;font-weight:900;color:${pts>=0?'var(--grn)':'var(--red)'};min-width:36px;text-align:right">${pts>0?'+':''}${pts}${dog?'🐶':''}</span>`
+                   : `<span style="font-size:10px;color:var(--dim);min-width:36px;text-align:right">pending</span>`
                }`
             : `<span style="font-size:10px;color:var(--dim);font-style:italic">did not vote</span>`
           }
@@ -903,7 +909,7 @@ function renderStandings(){
 
     // Last 10 settled picks, most recent first
     const settled=DB.matches
-      .filter(m=>m.winner)
+      .filter(m=>m.winner&&m.winner!=='ABANDONED')  // skip abandoned in form
       .map(m=>({m, v:DB.votes.find(x=>x.match_id===m.id&&x.user_code===u.code)}))
       .filter(x=>x.v)
       .sort((a,b)=>b.m.id-a.m.id)
@@ -1030,10 +1036,19 @@ function renderAdmin(){
 function adminCard(m){
   const locked=isLocked(m),ht=tm(m.home_team),at2=tm(m.away_team)
   const allV=matchVotes(m.id),total=allV.length
-  if(m.winner){return`<div class="ac">
-    <div class="ach"><div class="act">M${m.id} · ${ht.code} vs ${at2.code} · ${fmtD(m)}</div><span class="chip dn">Done</span></div>
-    <div class="db"><span>✅ ${m.winner} won · ${total} picks · Points calculated</span><button class="ub" onclick="askUndo(${m.id})">Undo?</button></div>
-  </div>`}
+  if(m.winner){
+    const isAbandoned=m.winner==='ABANDONED'
+    return`<div class="ac">
+      <div class="ach">
+        <div class="act">M${m.id} · ${ht.code} vs ${at2.code} · ${fmtD(m)}</div>
+        <span class="chip ${isAbandoned?'ab':'dn'}">${isAbandoned?'🌧 Abandoned':'Done'}</span>
+      </div>
+      <div class="${isAbandoned?'':'db'}" style="${isAbandoned?'background:rgba(94,95,122,.07);border:1px solid rgba(94,95,122,.2);border-radius:9px;padding:9px 12px;font-size:12px;font-weight:700;color:var(--dim2);display:flex;justify-content:space-between;align-items:center':''}">
+        <span>${isAbandoned?'🌧 Match abandoned · No points awarded · '+total+' votes voided':'✅ '+m.winner+' won · '+total+' picks · Points calculated'}</span>
+        <button class="ub" onclick="askUndo(${m.id})">Undo?</button>
+      </div>
+    </div>`
+  }
   const votedNames=USERS.filter(u=>allV.find(v=>v.user_code===u.code)).map(u=>u.name)
   const notVotedNames=USERS.filter(u=>!allV.find(v=>v.user_code===u.code)).map(u=>u.name)
   return`<div class="ac">
@@ -1052,7 +1067,13 @@ function adminCard(m){
         style="background:linear-gradient(135deg,${at2.dark}55,${at2.dark});color:${at2.light};border:1.5px solid ${at2.acc}44">
         ${at2.code}<span class="wbs">${locked?'👆 Tap = Winner':'Not locked'}</span></button>
     </div>
-    ${total>0?`<button onclick="askResetVotes(${m.id})" style="width:100%;margin-top:9px;padding:9px;border-radius:8px;border:1px solid rgba(232,61,90,.3);background:rgba(232,61,90,.06);color:var(--red);font-family:'Barlow',sans-serif;font-size:12px;font-weight:800;cursor:pointer">
+    <button ${!locked?'disabled':''} onclick="enterResult(${m.id},'ABANDONED')"
+      style="width:100%;margin-top:7px;padding:9px;border-radius:8px;border:1px solid rgba(94,95,122,.3);
+      background:rgba(94,95,122,.08);color:var(--dim2);font-family:'Barlow',sans-serif;font-size:12px;font-weight:800;
+      cursor:${locked?'pointer':'not-allowed'};opacity:${locked?'1':'.3'}">
+      🌧 Mark as Abandoned / No Result (0 pts for everyone)
+    </button>
+    ${total>0?`<button onclick="askResetVotes(${m.id})" style="width:100%;margin-top:7px;padding:9px;border-radius:8px;border:1px solid rgba(232,61,90,.3);background:rgba(232,61,90,.06);color:var(--red);font-family:'Barlow',sans-serif;font-size:12px;font-weight:800;cursor:pointer">
       🗑 Reset All Votes for This Match
     </button>`:''}
   </div>`
@@ -1067,6 +1088,15 @@ async function enterResult(mid,winner){
   const m=DB.matches.find(x=>x.id===mid)
   if(!m||!isLocked(m)){showToast('⏰ Match not locked yet!');return}
   if(m.winner){showToast('Already entered. Use Undo to change.');return}
+
+  // ABANDONED — just mark the match, no points for anyone
+  if(winner==='ABANDONED'){
+    const{error}=await sb.from('matches').update({winner:'ABANDONED'}).eq('id',mid)
+    if(error){showToast('❌ Failed: '+error.message);return}
+    showToast('🌧 Match marked as abandoned — no points awarded')
+    await refreshDB();renderAll()
+    return
+  }
 
   showToast('⏳ Calculating points…')
 
