@@ -314,11 +314,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 <div id="toast"></div>
 
 <script>
-/* ══════════════════════════════════════════════════════════
-   ⚙️  CONFIGURATION — Replace with your Supabase values
-   Get from: supabase.com → your project → Settings → API
-══════════════════════════════════════════════════════════ */
-const SUPABASE_URL  = 'https://kpfnoppmfvkxdssaabef.supabase.co'  // ← paste your URL
+const SUPABASE_URL  = 'https://kpfnoppmfvkxdssaabef.supabase.co'
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwZm5vcHBtZnZreGRzc2FhYmVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4ODEyODgsImV4cCI6MjA5MDQ1NzI4OH0.Prjaq85U5EDTKdRrn4tqiO0p-7ktlE1d5yjBfXlLVp4'
 
 /* ══════════════════════════════════════════════════════════
@@ -366,21 +362,16 @@ const PP = {}  // pending picks (UI state only)
 window.addEventListener('DOMContentLoaded', async () => {
   const loadtxt = document.querySelector('.loadtxt')
   try {
-    // Supabase UMD exposes window.supabase
     if(!window.supabase) throw new Error('Supabase SDK not loaded')
     sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON)
     loadtxt.textContent = 'LOADING DATA…'
     await refreshDB()
-    // Show login screen
     document.getElementById('sLoad').classList.replace('on','off')
     document.getElementById('sL').classList.replace('off','on')
   } catch(e) {
-    loadtxt.textContent = 'FAILED: ' + e.message
-    loadtxt.style.color = '#e83d5a'
-    loadtxt.style.fontSize = '12px'
-    loadtxt.style.padding = '0 20px'
-    loadtxt.style.textAlign = 'center'
-    console.error('Init error:', e)
+    loadtxt.textContent = 'ERROR: ' + e.message
+    loadtxt.style.cssText='color:#e83d5a;font-size:12px;padding:0 20px;text-align:center;font-family:Barlow,sans-serif'
+    console.error(e)
   }
 })
 
@@ -422,7 +413,7 @@ function fmtD(m){
 }
 function dateHdr(ds){
   const td=todayStr(),[y,mo,d]=ds.split('-').map(Number)
-  const mns=['Jan','Feb','Mar','Apr','May','Jun']
+  const mns=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
   if(ds===td)return`📅 TODAY · ${d} ${mns[mo-1]}`
   const yest=new Date(Date.now()-86400000)
   const yd=`${yest.getUTCFullYear()}-${String(yest.getUTCMonth()+1).padStart(2,'0')}-${String(yest.getUTCDate()).padStart(2,'0')}`
@@ -546,12 +537,12 @@ function renderMatches(){
 function buildCard(m){
   const st=mstat(m),ht=tm(m.home_team),at2=tm(m.away_team)
   const mv=myVote(m.id),locked=isLocked(m)
-  const hW=m.winner===m.home_team,aW=m.winner===m.away_team
+  const isAbandoned=m.winner==='ABANDONED'
+  const hW=m.winner&&!isAbandoned&&m.winner===m.home_team
+  const aW=m.winner&&!isAbandoned&&m.winner===m.away_team
   const isFuture=!m.is_past&&!locked&&m.match_date>todayStr()
   const chipCls=st==='op'&&isFuture?'ft':st
-  const isAbandoned=m.winner==='ABANDONED'
   const chipLbl={op:isFuture?`Open · Locks ${fmtD(m)}`:'Open · Vote Now',lk:'🔒 Locked',dn:isAbandoned?'🌧 Abandoned':m.winner?`${tm(m.winner).code} Won`:'Result In',ab:'🌧 Abandoned'}
-  if(isAbandoned){hW=false;aW=false}  // no winner highlight for abandoned
 
   let h=`<div class="mc">
     <div class="mh">
@@ -603,6 +594,17 @@ function buildCard(m){
         </div>
       </div>
     </div>`
+  } else if(st==='ab') {
+    // Abandoned — show grey banner, no points
+    const allV=matchVotes(m.id)
+    h+=`<div class="rz">
+      <div class="rzh">
+        <span class="rzl">${Object.keys(allV).length} votes placed</span>
+        <span class="rzb" style="color:var(--dim2)">🌧 ABANDONED</span>
+      </div>
+      <div style="font-size:11px;color:var(--dim2);padding:4px 0 4px">Match abandoned — no points awarded to anyone.</div>
+      <div class="chs">${buildChips(m,allV)}</div>
+    </div>`
   } else {
     const allV=matchVotes(m.id),total=allV.length
     const hc=allV.filter(v=>v.team===m.home_team).length
@@ -635,7 +637,8 @@ function buildChips(m,allV){
   if(!allV.length)return'<span style="font-size:10px;color:var(--dim)">No picks placed</span>'
   return USERS.map(u=>{
     const v=allV.find(x=>x.user_code===u.code);if(!v)return''
-    const vt=tm(v.team),win=m.winner&&v.team===m.winner,loss=m.winner&&v.team!==m.winner
+    const abandoned=m.winner==='ABANDONED'
+    const vt=tm(v.team),win=!abandoned&&m.winner&&v.team===m.winner,loss=!abandoned&&m.winner&&v.team!==m.winner
     const dog=win&&isDog(m.id,v.team)
     const pts=win?`<span style="color:var(--grn);font-weight:900">+${v.confidence*10+(dog?5:0)}${dog?'🐶':''}</span>`
              :loss?`<span style="color:var(--red);font-weight:900">-${v.confidence*5}</span>`:''
